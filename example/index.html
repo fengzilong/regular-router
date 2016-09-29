@@ -1,0 +1,92 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>demo</title>
+	</head>
+	<body>
+		<div id="app"></div>
+
+		<script src="../dist/regular-router.js"></script>
+		<script src="./regular.js"></script>
+		<script type="text/javascript">
+			Regular.use( regularRouter );
+
+			const App = Regular.extend({
+				template: `
+					<aside>Sidebar</aside>
+					<section>
+						<router-view name="aaa"></router-view>
+					</section>
+					<p>
+						<router-view></router-view>
+					</p>
+				`,
+				config() {
+					console.log( 'App config called' );
+				}
+			});
+
+			const Display = Regular.extend({
+				template: `
+					<button on-click="{ this.onClick() }">like</button>
+				`,
+				onClick() {
+					console.log( 'clicked' );
+				},
+				config() {
+					console.log( 'display' );
+				},
+			});
+
+			const Counter = Regular.extend({
+				template: `
+					{ count }
+					<button on-click="{ this.onAdd() }">+</button>
+					<button on-click="{ this.onMinus() }">-</button>
+					<a href="#!/app/display">link</a>
+				`,
+				config() {
+					this.data.count = 0;
+					console.log( 'Counter config called' );
+				},
+				route: {
+					canEnter( { route, redirect, next } ) {
+						// redirect( url ), for human, url is more understandable
+						console.log( 'auth' );
+						next();
+					},
+					enter() {
+
+					}
+				},
+				onAdd() {
+					this.data.count++;
+				},
+				onMinus() {
+					this.data.count--;
+				}
+			});
+
+			const router = new regularRouter({
+				routes: {
+					'app': {
+						url: '/app',
+						component: App
+					},
+					'app.counter': {
+						url: 'counter',
+						components: {
+							aaa: Counter
+						}
+					},
+					'app.display': {
+						url: 'display',
+						component: Display,
+					}
+				}
+			});
+
+			router.start( '#app' );
+		</script>
+	</body>
+</html>
