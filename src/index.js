@@ -30,7 +30,7 @@ class Router {
 		Regular.use( view );
 		Regular.use( link );
 
-		// setup routes from options.routes
+		// get routes from options.routes
 		const { routes } = this._options;
 
 		// transform routes

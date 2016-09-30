@@ -1151,7 +1151,7 @@ Router.prototype.start = function start ( selector ) {
 	Regular.use( view );
 	Regular.use( link );
 
-	// setup routes from options.routes
+	// get routes from options.routes
 	var ref = this._options;
 		var routes = ref.routes;
 
