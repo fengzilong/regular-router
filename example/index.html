@@ -11,22 +11,20 @@
 		<script type="text/javascript">
 			Regular.use( regularRouter );
 
-			const App = Regular.extend({
+			const App = {
 				template: `
 					<aside>Sidebar</aside>
 					<section>
 						<router-view name="aaa"></router-view>
 					</section>
-					<p>
-						<router-view></router-view>
-					</p>
+					<router-view></router-view>
 				`,
 				config() {
-					console.log( 'App config called' );
+					// console.log( 'App config called' );
 				}
-			});
+			};
 
-			const Display = Regular.extend({
+			const Display = {
 				template: `
 					<button on-click="{ this.onClick() }">like</button>
 				`,
@@ -34,11 +32,11 @@
 					console.log( 'clicked' );
 				},
 				config() {
-					console.log( 'display' );
+					// console.log( 'display' );
 				},
-			});
+			};
 
-			const Counter = Regular.extend({
+			const Counter = {
 				template: `
 					{ count }
 					<button on-click="{ this.onAdd() }">+</button>
@@ -47,7 +45,7 @@
 				`,
 				config() {
 					this.data.count = 0;
-					console.log( 'Counter config called' );
+					// console.log( 'Counter config called' );
 				},
 				route: {
 					canEnter( { route, redirect, next } ) {
@@ -55,8 +53,8 @@
 						console.log( 'auth' );
 						next();
 					},
-					enter() {
-
+					canLeave( { next } ) {
+						next();
 					}
 				},
 				onAdd() {
@@ -65,25 +63,29 @@
 				onMinus() {
 					this.data.count--;
 				}
-			});
+			};
 
 			const router = new regularRouter({
-				routes: {
-					'app': {
+				routes: [
+					{
 						url: '/app',
-						component: App
-					},
-					'app.counter': {
-						url: 'counter',
-						components: {
-							aaa: Counter
-						}
-					},
-					'app.display': {
-						url: 'display',
-						component: Display,
+						component: App,
+						children: [
+							{
+								url: 'counter',
+								components: {
+									aaa: Counter
+								}
+							},
+							{
+								url: 'display',
+								components: {
+									aaa: Display,
+								},
+							}
+						]
 					}
-				}
+				]
 			});
 
 			// router.beforeEach(function( transition ) {

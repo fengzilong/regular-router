@@ -1,7 +1,7 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(global.regularRouter = factory());
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
+  (global.regularRouter = factory());
 }(this, (function () { 'use strict';
 
 function createCommonjsModule(fn, module) {
@@ -1067,6 +1067,8 @@ StateMan.State = state;
 
 var index = StateMan;
 
+// import CircularJSON from '../utils/circular-json';
+
 var view = function (Regular) {
 	var RouterView = Regular.extend( {
 		name: 'router-view',
@@ -1074,17 +1076,15 @@ var view = function (Regular) {
 		config: function config() {
 			this._commentInserted = false;
 
-			if( !this.$parent.__router_views__ ) {
-				this.$parent.__router_views__ = {};
-			}
+			var $router = this.$router;
+			var name = this.data.name || 'default';
 
-			// auto pass current router-view instance to parent
-			var name = this.data.name;
-			if ( !name ) {
-				this.$parent.__router_views__[ 'default' ] = this;
-			} else {
-				this.$parent.__router_views__[ name ] = this;
-			}
+			$router.emit( 'add-router-view', {
+				key: name,
+				value: this
+			} );
+
+			// console.log( '>', CircularJSON.parse( CircularJSON.stringify( $router.current ) ) );
 
 			this.$mute();
 		},
@@ -1096,11 +1096,20 @@ var view = function (Regular) {
 		clear: function clear() {
 			if( this._prevcomponent ) {
 				this._prevcomponent.$inject( false );
+				this._prevcomponent.destroy();
 			}
 		},
 		render: function render( component ) {
+			if( !this.$root ) {
+				return;
+			}
+			if ( this.$root.data.__view_name__ !== 'default' ) {
+				this.$refs.v.parentNode && this.$refs.v.parentNode.removeChild( this.$refs.v );
+				delete this.$refs.v;
+				return;
+			}
 			var comment = this._comment;
-			if ( !this._commentInserted ) {
+			if ( !this._commentInserted && this.$refs.v.parentNode ) {
 				Regular.dom.inject( comment, this.$refs.v, 'after' );
 				this.$refs.v.parentNode.removeChild( this.$refs.v );
 				delete this.$refs.v;
@@ -1108,10 +1117,12 @@ var view = function (Regular) {
 			}
 
 			if ( !component ) {
+				// this.clear();
 				return;
 			}
-
-			component.$inject( comment, 'after' );
+			if ( comment.parentNode ) {
+				component.$inject( comment, 'after' );
+			}
 			this._prevcomponent = component;
 		}
 	} );
@@ -1123,6 +1134,58 @@ var link = function (Regular) {
 		template: "\n\t\t\t<a href=\"{ to }\">{#inc this.$body}</a>\n\t\t"
 	});
 }
+
+function each( obj, fn ) {
+	var keys = Object.keys( obj );
+	for ( var i = 0, len = keys.length; i < len; i++ ) {
+		var key = keys[ i ];
+		fn( obj[ key ], key, obj );
+	}
+}
+
+var walkId = 0;
+function walk( obj, fn, name ) {
+	if ( name === void 0 ) name = 'annoymous';
+
+	each( obj, function (v) {
+		var wi = v.name || (name + "_" + (walkId++));
+		fn( v, wi );
+		if ( v.children ) {
+			walk( v.children, fn, (wi + ".annoymous") );
+		}
+	} );
+}
+
+var checkPurview = function ( e, cmd, components, cb ) {
+	var done = e.async();
+	var current = e.current;
+	var go = e.go;
+
+	var len = Object.keys( components ).length;
+
+	function next() {
+		len--;
+
+		if( len === 0 ) {
+			done();
+			cb && cb();
+		}
+	}
+
+	for ( var i in components ) {
+		var component = components[ i ];
+		var canTransition = component.route && component.route[ cmd ];
+		if ( !canTransition ) {
+			next();
+		} else {
+			canTransition( {
+				route: current,
+				redirect: go,
+				next: next
+			} );
+		}
+	}
+};
 
 var Regular;
 
@@ -1155,102 +1218,114 @@ Router.prototype.start = function start ( selector ) {
 	var ref = this._options;
 		var routes = ref.routes;
 
+	// flat
+	var routeMap = {};
+	walk( routes, function( v, name ) {
+		if ( !~name.indexOf( '.' ) ) {
+			v.isRootRoute = true;
+		}
+		routeMap[ name ] = v;
+	} );
+
+	// TODO: event emitter will be more easy
+	var routerViewStack = {};
+	stateman.on( {
+		'add-router-view': function( ref ) {
+				var key = ref.key;
+				var value = ref.value;
+
+			var name = stateman.current.parent.name;
+			routerViewStack[ name ] = routerViewStack[ name ] || {};
+			routerViewStack[ name ][ key ] = value;
+		},
+		'purge-router-view': function() {
+			var name = stateman.current.parent.name;
+			routerViewStack[ name ] = {};
+		}
+	} );
+
 	// transform routes
 	var statemanRoutes = {};
-	var loop = function ( i ) {
-		var route = routes[ i ];
-		var Component = route.component;
-		var Components = route.components || {};
+	var loop = function ( name ) {
+		var route = routeMap[ name ];
+		var parentName = name.split( '.' ).slice( 0, -1 ).join( '.' );
+		var component = route.component;
+		var components = route.components || {};
+		var CtorMap = {};
 
-		statemanRoutes[ i ] = {
+		// combine
+		if ( !components[ 'default' ] && component ) {
+			components[ 'default' ] = component;
+		}
+
+		statemanRoutes[ name ] = {
 			url: route.url,
-			canEnter: function canEnter( e ) {
-					var this$1 = this;
-
-				var components = this.components;
-
-				// cache components by default, if you want to clean state, do it in component.route.enter hook on your own
-				if ( !components ) {
-					this.components = components = {};
-					if ( !Components[ 'default' ] ) {
-						Components[ 'default' ] = Component;
-					}
-					this.Components = Components;
-
-					for ( var i in Components ) {
-						var Comp = Components[ i ];
-						// check Component
-						if ( Comp && Comp.extend ) {
-							components[ i ] = new Comp();
-						}
-					}
-				}
-
-				// TODO: pick all routerViews out into this.
-
-				var done = e.async();
-
-				var len = Object.keys( components ).length;
-				function next() {
-					len--;
-
-					if( len === 0 ) {
-						done();
-					}
-				}
-
-				for ( var i$1 in components ) {
-					var component = components[ i$1 ];
-					var canEnter = component.route && component.route.canEnter.bind( component );
-					if ( !canEnter ) {
-						next();
-					} else {
-						canEnter( {
-							route: this$1,
-							redirect: e.go,
-							next: next
-						} );
-					}
-				}
+			update: function update( e ) {
+				// reuse them, do nothing
 			},
 			enter: function enter( e ) {
-				var parent = this.parent;
-				var routerViews = parent.components && parent.components[ 'default' ] && parent.components[ 'default' ].__router_views__ && parent.components[ 'default' ].__router_views__;
-				var components = this.components || {};
-				var Components = this.Components || {};
+				console.log( '@@route', e.current.name, 'enter' );
+				var current = e.current;
 
-				if ( !components ) {
-					return;
+				var instanceMap = {};
+				// initialize component ctors
+				if( !CtorMap[ name ] ) {
+					CtorMap[ name ] = {};
+					for ( var i in components ) {
+						var cp = components[ i ];
+						CtorMap[ name ][ i ] = Regular.extend( cp );
+					}
 				}
 
-				if ( routerViews ) {
-					// find component for all routerView, if not found, just clean prev component
-					for ( var i in routerViews ) {
-						var routerView = routerViews[ i ];
-						var component = components[ i ];
-						if ( component ) {
-							routerView.render( components[ i ] );
-						} else {
-							routerView.clear();
+				// get instances, and routerViews will automatically mount to current after this
+				for ( var i$1 in CtorMap[ name ] ) {
+					instanceMap[ i$1 ] = new CtorMap[ name ][ i$1 ]({
+						data: {
+							__view_name__: i$1
 						}
-					}
-				} else {
-					for ( var i$1 in components ) {
-						var component$1 = components[ i$1 ];
-						component$1.$inject( rootNode );
+					});
+				}
+
+				var routerViews = routerViewStack[ parentName ];
+
+				// render router-view
+				if ( routerViews ) {
+					for ( var i$2 in routerViews ) {
+						var routerView = routerViews[ i$2 ];
+						// 当前的router-view可能找不到匹配的对象
+						routerView.render( instanceMap[ i$2 ] );
 					}
 				}
+
+				if ( route.isRootRoute ) {
+					instanceMap[ 'default' ] && instanceMap[ 'default' ].$inject( rootNode );
+				}
+			},
+			canEnter: function canEnter( e ) {
+				checkPurview( e, 'canEnter', components );
 			},
 			canLeave: function canLeave( e ) {
-
+				checkPurview( e, 'canLeave', components );
 			},
 			leave: function leave( e ) {
+				console.log( '@@route', e.path, 'leave' );
 
+				// destroy them
+				var current = e.current;
+				var routerViews = routerViewStack[ parentName ];
+
+				// clean router-view
+				if ( routerViews ) {
+					for ( var i in routerViews ) {
+						var routerView = routerViews[ i ];
+						routerView.clear();
+					}
+				}
 			}
 		};
 	};
 
-		for ( var i in routes ) loop( i );
+		for ( var name in routeMap ) loop( name );
 
 	stateman.state( statemanRoutes );
 
