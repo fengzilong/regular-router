@@ -45,22 +45,19 @@ class Router {
 			routeMap[ name ] = v;
 		} );
 
-		// TODO: event emitter will be more easy
 		let routerViewStack = {};
 		stateman.on( {
-			'add-router-view': function( { key, value } ) {
-				const name = stateman.current.parent.name;
-				routerViewStack[ name ] = routerViewStack[ name ] || {};
-				routerViewStack[ name ][ key ] = value;
+			'add-router-view': function( { phase, key, value } ) {
+				routerViewStack[ phase ] = routerViewStack[ phase ] || {};
+				routerViewStack[ phase ][ key ] = value;
 			},
-			'purge-router-view': function() {
-				const name = stateman.current.parent.name;
-				routerViewStack[ name ] = {};
-			}
+			// 'purge-router-view': function( { phase } ) {
+			// 	routerViewStack[ phase ] = {};
+			// }
 		} );
 
 		// transform routes
-		const statemanRoutes = {};
+		const transformedRoutes = {};
 		for ( let name in routeMap ) {
 			const route = routeMap[ name ];
 			const parentName = name.split( '.' ).slice( 0, -1 ).join( '.' );
@@ -73,31 +70,30 @@ class Router {
 				components[ 'default' ] = component;
 			}
 
-			statemanRoutes[ name ] = {
+			transformedRoutes[ name ] = {
 				url: route.url,
 				update( e ) {
 					// reuse them, do nothing
 				},
 				enter( e ) {
-					console.log( '@@route', e.current.name, 'enter' );
+					console.log( '@@route', name, 'enter' );
 					const current = e.current;
 
 					const instanceMap = {};
+
 					// initialize component ctors
-					if( !CtorMap[ name ] ) {
-						CtorMap[ name ] = {};
-						for ( let i in components ) {
-							const cp = components[ i ];
-							CtorMap[ name ][ i ] = Regular.extend( cp );
-						}
+					CtorMap[ name ] = {};
+
+					for ( let i in components ) {
+						const cp = components[ i ];
+						CtorMap[ name ][ i ] = Regular.extend( cp );
 					}
 
-					// get instances, and routerViews will automatically mount to current after this
+					// get instances, and routerViews will be mounted
 					for ( let i in CtorMap[ name ] ) {
 						instanceMap[ i ] = new CtorMap[ name ][ i ]({
-							data: {
-								__view_name__: i
-							}
+							__phase__: name,
+							__view__: i
 						});
 					}
 
@@ -107,7 +103,6 @@ class Router {
 					if ( routerViews ) {
 						for ( let i in routerViews ) {
 							const routerView = routerViews[ i ];
-							// 当前的router-view可能找不到匹配的对象
 							routerView.render( instanceMap[ i ] );
 						}
 					}
@@ -123,9 +118,8 @@ class Router {
 					checkPurview( e, 'canLeave', components );
 				},
 				leave( e ) {
-					console.log( '@@route', e.path, 'leave' );
+					console.log( '@@route', name, 'leave' );
 
-					// destroy them
 					const current = e.current;
 					const routerViews = routerViewStack[ parentName ];
 
@@ -140,7 +134,7 @@ class Router {
 			};
 		}
 
-		stateman.state( statemanRoutes );
+		stateman.state( transformedRoutes );
 
 		stateman.start( {
 			root: '/example',

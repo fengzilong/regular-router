@@ -42,6 +42,7 @@
 					<button on-click="{ this.onAdd() }">+</button>
 					<button on-click="{ this.onMinus() }">-</button>
 					<a href="#!/app/display">link</a>
+					<router-view name="lll"></router-view>
 				`,
 				config() {
 					this.data.count = 0;
@@ -65,19 +66,46 @@
 				}
 			};
 
+			// app -> App -> default + aaa
+			// counter -> ↑ && display -> ↑
+			// counter -> Counter -> lll
+
 			const router = new regularRouter({
 				routes: [
 					{
+						name: 'app',
 						url: '/app',
 						component: App,
 						children: [
 							{
+								name: 'counter',
 								url: 'counter',
 								components: {
-									aaa: Counter
-								}
+									aaa: Counter,
+									default: {
+										template: `
+											ddd:
+											<router-view name="ddd"></router-view>:
+										`
+									}
+								},
+								children: [
+									{
+										url: 'ccc',
+										name: 'ccc',
+										components: {
+											ddd: {
+												template: `ddd-jdasjdkasdsa`
+											},
+											lll: {
+												template: `lll-jdasjdkasdsa`
+											}
+										}
+									}
+								]
 							},
 							{
+								name: 'display',
 								url: 'display',
 								components: {
 									aaa: Display,

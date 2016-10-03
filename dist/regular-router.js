@@ -1080,11 +1080,12 @@ var view = function (Regular) {
 			var name = this.data.name || 'default';
 
 			$router.emit( 'add-router-view', {
+				phase: this.$root.__phase__,
 				key: name,
 				value: this
 			} );
 
-			// console.log( '>', CircularJSON.parse( CircularJSON.stringify( $router.current ) ) );
+			// console.log( '>', name, CircularJSON.parse( CircularJSON.stringify( $router.current ) ) );
 
 			this.$mute();
 		},
@@ -1100,20 +1101,15 @@ var view = function (Regular) {
 			}
 		},
 		render: function render( component ) {
-			if( !this.$root ) {
-				return;
-			}
-			if ( this.$root.data.__view_name__ !== 'default' ) {
-				this.$refs.v.parentNode && this.$refs.v.parentNode.removeChild( this.$refs.v );
-				delete this.$refs.v;
-				return;
-			}
 			var comment = this._comment;
-			if ( !this._commentInserted && this.$refs.v.parentNode ) {
+			if ( !this._commentInserted ) {
 				Regular.dom.inject( comment, this.$refs.v, 'after' );
+				this._commentInserted = true;
+			}
+
+			if ( this.$refs.v && this.$refs.v.parentNode ) {
 				this.$refs.v.parentNode.removeChild( this.$refs.v );
 				delete this.$refs.v;
-				this._commentInserted = true;
 			}
 
 			if ( !component ) {
@@ -1123,6 +1119,7 @@ var view = function (Regular) {
 			if ( comment.parentNode ) {
 				component.$inject( comment, 'after' );
 			}
+
 			this._prevcomponent = component;
 		}
 	} );
@@ -1143,15 +1140,14 @@ function each( obj, fn ) {
 	}
 }
 
-var walkId = 0;
+var id = 0;
 function walk( obj, fn, name ) {
-	if ( name === void 0 ) name = 'annoymous';
-
 	each( obj, function (v) {
-		var wi = v.name || (name + "_" + (walkId++));
-		fn( v, wi );
+		var currentName = v.name || ("annoymous_" + (id++));
+		var path = name ? (name + "." + currentName) : currentName;
+		fn( v, path );
 		if ( v.children ) {
-			walk( v.children, fn, (wi + ".annoymous") );
+			walk( v.children, fn, path );
 		}
 	} );
 }
@@ -1227,25 +1223,23 @@ Router.prototype.start = function start ( selector ) {
 		routeMap[ name ] = v;
 	} );
 
-	// TODO: event emitter will be more easy
 	var routerViewStack = {};
 	stateman.on( {
 		'add-router-view': function( ref ) {
+				var phase = ref.phase;
 				var key = ref.key;
 				var value = ref.value;
 
-			var name = stateman.current.parent.name;
-			routerViewStack[ name ] = routerViewStack[ name ] || {};
-			routerViewStack[ name ][ key ] = value;
+			routerViewStack[ phase ] = routerViewStack[ phase ] || {};
+			routerViewStack[ phase ][ key ] = value;
 		},
-		'purge-router-view': function() {
-			var name = stateman.current.parent.name;
-			routerViewStack[ name ] = {};
-		}
+		// 'purge-router-view': function( { phase } ) {
+		// routerViewStack[ phase ] = {};
+		// }
 	} );
 
 	// transform routes
-	var statemanRoutes = {};
+	var transformedRoutes = {};
 	var loop = function ( name ) {
 		var route = routeMap[ name ];
 		var parentName = name.split( '.' ).slice( 0, -1 ).join( '.' );
@@ -1258,31 +1252,30 @@ Router.prototype.start = function start ( selector ) {
 			components[ 'default' ] = component;
 		}
 
-		statemanRoutes[ name ] = {
+		transformedRoutes[ name ] = {
 			url: route.url,
 			update: function update( e ) {
 				// reuse them, do nothing
 			},
 			enter: function enter( e ) {
-				console.log( '@@route', e.current.name, 'enter' );
+				console.log( '@@route', name, 'enter' );
 				var current = e.current;
 
 				var instanceMap = {};
+
 				// initialize component ctors
-				if( !CtorMap[ name ] ) {
-					CtorMap[ name ] = {};
-					for ( var i in components ) {
-						var cp = components[ i ];
-						CtorMap[ name ][ i ] = Regular.extend( cp );
-					}
+				CtorMap[ name ] = {};
+
+				for ( var i in components ) {
+					var cp = components[ i ];
+					CtorMap[ name ][ i ] = Regular.extend( cp );
 				}
 
-				// get instances, and routerViews will automatically mount to current after this
+				// get instances, and routerViews will be mounted
 				for ( var i$1 in CtorMap[ name ] ) {
 					instanceMap[ i$1 ] = new CtorMap[ name ][ i$1 ]({
-						data: {
-							__view_name__: i$1
-						}
+						__phase__: name,
+						__view__: i$1
 					});
 				}
 
@@ -1292,7 +1285,6 @@ Router.prototype.start = function start ( selector ) {
 				if ( routerViews ) {
 					for ( var i$2 in routerViews ) {
 						var routerView = routerViews[ i$2 ];
-						// 当前的router-view可能找不到匹配的对象
 						routerView.render( instanceMap[ i$2 ] );
 					}
 				}
@@ -1308,9 +1300,8 @@ Router.prototype.start = function start ( selector ) {
 				checkPurview( e, 'canLeave', components );
 			},
 			leave: function leave( e ) {
-				console.log( '@@route', e.path, 'leave' );
+				console.log( '@@route', name, 'leave' );
 
-				// destroy them
 				var current = e.current;
 				var routerViews = routerViewStack[ parentName ];
 
@@ -1327,7 +1318,7 @@ Router.prototype.start = function start ( selector ) {
 
 		for ( var name in routeMap ) loop( name );
 
-	stateman.state( statemanRoutes );
+	stateman.state( transformedRoutes );
 
 	stateman.start( {
 		root: '/example',
