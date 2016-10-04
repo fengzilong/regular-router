@@ -73,7 +73,7 @@ class Router {
 			transformedRoutes[ name ] = {
 				url: route.url,
 				update( e ) {
-					// reuse them, do nothing
+					// reuse, do nothing
 				},
 				enter( e ) {
 					console.log( '@@route', name, 'enter' );
@@ -137,7 +137,6 @@ class Router {
 		stateman.state( transformedRoutes );
 
 		stateman.start( {
-			root: '/example',
 			prefix: '!'
 		} );
 	}

@@ -1255,7 +1255,7 @@ Router.prototype.start = function start ( selector ) {
 		transformedRoutes[ name ] = {
 			url: route.url,
 			update: function update( e ) {
-				// reuse them, do nothing
+				// reuse, do nothing
 			},
 			enter: function enter( e ) {
 				console.log( '@@route', name, 'enter' );
@@ -1321,7 +1321,6 @@ Router.prototype.start = function start ( selector ) {
 	stateman.state( transformedRoutes );
 
 	stateman.start( {
-		root: '/example',
 		prefix: '!'
 	} );
 };
