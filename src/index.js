@@ -1,7 +1,6 @@
 import Stateman from 'stateman';
 import view from './components/view';
 import link from './components/link';
-import each from './utils/each';
 import walk from './walk';
 import checkPurview from './purview';
 
@@ -38,11 +37,11 @@ class Router {
 
 		// flat
 		const routeMap = {};
-		walk( routes, function( v, name ) {
+		walk( routes, function( route, name ) {
 			if ( !~name.indexOf( '.' ) ) {
-				v.isRootRoute = true;
+				route.isRootRoute = true;
 			}
-			routeMap[ name ] = v;
+			routeMap[ name ] = route;
 		} );
 
 		let routerViewStack = {};

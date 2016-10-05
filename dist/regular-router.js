@@ -1216,11 +1216,11 @@ Router.prototype.start = function start ( selector ) {
 
 	// flat
 	var routeMap = {};
-	walk( routes, function( v, name ) {
+	walk( routes, function( route, name ) {
 		if ( !~name.indexOf( '.' ) ) {
-			v.isRootRoute = true;
+			route.isRootRoute = true;
 		}
-		routeMap[ name ] = v;
+		routeMap[ name ] = route;
 	} );
 
 	var routerViewStack = {};
