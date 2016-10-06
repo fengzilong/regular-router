@@ -1152,6 +1152,78 @@ function walk( obj, fn, name ) {
 	} );
 }
 
+function digestComponentDeps( routes ) {
+	var dirty = false;
+	var ttl = 20;
+
+	// handle components deps
+	function walkComponents( extendOptions ) {
+		// first and no deps
+		if ( !extendOptions.components && !extendOptions._Ctor ) {
+			extendOptions._Ctor = Regular.extend( extendOptions );
+			return;
+		}
+
+		var cps = extendOptions.components;
+
+		// deps are ready
+		var isReady = true;
+		for ( var i in cps ) {
+			if ( !cps[ i ]._Ctor ) {
+				isReady = false;
+				break;
+			}
+		}
+
+		if ( isReady ) {
+			var Ctor = Regular.extend( extendOptions );
+			// register component on Ctor
+			for ( var i$1 in cps ) {
+				Ctor.component( i$1, cps[ i$1 ]._Ctor )
+			}
+			extendOptions._Ctor = Ctor;
+			return;
+		}
+
+		// if exists deps, and deps are not ready, mark as dirty, wait for next digest
+		dirty = true;
+
+		for ( var i$2 in cps ) {
+			walkComponents( cps[ i$2 ] );
+		}
+	}
+
+	function digestOne() {
+		// reset
+		dirty = false;
+
+		walk( routes, function( route ) {
+			var components = route.components || {};
+			// combine
+			if ( route.component ) {
+				components[ 'default' ] = route.component;
+			}
+			for ( var i in components ) {
+				walkComponents( components[ i ] );
+			}
+		} );
+
+		ttl--;
+
+		if ( !ttl ) {
+			// error
+			throw new Error( "components dependencies parse failed" );
+		}
+
+		if ( dirty && ttl ) {
+			// next digest
+			digestOne();
+		}
+	}
+
+	digestOne();
+}
+
 var checkPurview = function ( e, cmd, components, cb ) {
 	var done = e.async();
 	var current = e.current;
@@ -1183,12 +1255,13 @@ var checkPurview = function ( e, cmd, components, cb ) {
 	}
 };
 
-var Regular;
+// maybe Regular or extended from Regular, either is ok
+var Regular$1;
 
 var Router = function Router( options ) {
 	// directly call
 	if ( !( this instanceof Router ) ) {
-		Regular = options;
+		Regular$1 = options;
 		return;
 	}
 
@@ -1202,13 +1275,13 @@ Router.prototype.start = function start ( selector ) {
 
 	// make stateman avaiable for all Regular instances
 	var stateman = new index();
-	Regular.implement({
+	Regular$1.implement({
 		$router: stateman
 	});
 
 	// register helper components
-	Regular.use( view );
-	Regular.use( link );
+	Regular$1.use( view );
+	Regular$1.use( link );
 
 	// get routes from options.routes
 	var ref = this._options;
@@ -1222,6 +1295,9 @@ Router.prototype.start = function start ( selector ) {
 		}
 		routeMap[ name ] = route;
 	} );
+
+	// digest components dependencies
+	digestComponentDeps( routes );
 
 	var routerViewStack = {};
 	stateman.on( {
@@ -1268,7 +1344,7 @@ Router.prototype.start = function start ( selector ) {
 
 				for ( var i in components ) {
 					var cp = components[ i ];
-					CtorMap[ name ][ i ] = Regular.extend( cp );
+					CtorMap[ name ][ i ] = cp._Ctor;
 				}
 
 				// get instances, and routerViews will be mounted

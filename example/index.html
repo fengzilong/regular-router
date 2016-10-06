@@ -36,8 +36,23 @@
 				},
 			};
 
-			const Counter = {
+			const Btn = {
 				template: `
+					<button on-click="{ this.onClick() }">
+						{#inc this.$body}
+					</button>
+				`,
+				onClick() {
+					console.log( 'clicked' );
+				}
+			}
+
+			const Counter = {
+				components: {
+					Button: Btn,
+				},
+				template: `
+					<Button>Btn</Button>
 					{ count }
 					<button on-click="{ this.onAdd() }">+</button>
 					<button on-click="{ this.onMinus() }">-</button>

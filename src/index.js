@@ -2,8 +2,10 @@ import Stateman from 'stateman';
 import view from './components/view';
 import link from './components/link';
 import walk from './walk';
+import digest from './digest';
 import checkPurview from './purview';
 
+// maybe Regular or extended from Regular, either is ok
 let Regular;
 
 class Router {
@@ -43,6 +45,9 @@ class Router {
 			}
 			routeMap[ name ] = route;
 		} );
+
+		// digest components dependencies
+		digest( routes );
 
 		let routerViewStack = {};
 		stateman.on( {
@@ -85,7 +90,7 @@ class Router {
 
 					for ( let i in components ) {
 						const cp = components[ i ];
-						CtorMap[ name ][ i ] = Regular.extend( cp );
+						CtorMap[ name ][ i ] = cp._Ctor;
 					}
 
 					// get instances, and routerViews will be mounted
