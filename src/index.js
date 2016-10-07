@@ -1,18 +1,16 @@
 import Stateman from 'stateman';
 import view from './components/view';
 import link from './components/link';
+import { setCtor, getCtor } from './ctor';
 import walk from './walk';
 import digest from './digest';
 import checkPurview from './purview';
-
-// maybe Regular or extended from Regular, either is ok
-let Regular;
 
 class Router {
 	constructor( options ) {
 		// directly call
 		if ( !( this instanceof Router ) ) {
-			Regular = options;
+			setCtor( options );
 			return;
 		}
 
@@ -23,16 +21,21 @@ class Router {
 		const rootNode =
 			( selector && document.querySelector( selector ) ) ||
 			document.body;
+		const Component = getCtor();
+
+		if ( !Component ) {
+			throw new Error( 'regular-router not initialized yet' );
+		}
 
 		// make stateman avaiable for all Regular instances
 		const stateman = new Stateman();
-		Regular.implement({
+		Component.implement({
 			$router: stateman
 		});
 
 		// register helper components
-		Regular.use( view );
-		Regular.use( link );
+		Component.use( view );
+		Component.use( link );
 
 		// get routes from options.routes
 		const { routes } = this._options;

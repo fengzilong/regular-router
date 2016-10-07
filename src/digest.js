@@ -1,6 +1,8 @@
 import walk from './walk';
+import { getCtor } from './ctor';
 
 export default function digestComponentDeps( routes ) {
+	const Component = getCtor();
 	let dirty = false;
 	let ttl = 20;
 
@@ -8,7 +10,7 @@ export default function digestComponentDeps( routes ) {
 	function walkComponents( extendOptions ) {
 		// first and no deps
 		if ( !extendOptions.components && !extendOptions._Ctor ) {
-			extendOptions._Ctor = Regular.extend( extendOptions );
+			extendOptions._Ctor = Component.extend( extendOptions );
 			return;
 		}
 
@@ -24,7 +26,7 @@ export default function digestComponentDeps( routes ) {
 		}
 
 		if ( isReady ) {
-			const Ctor = Regular.extend( extendOptions );
+			const Ctor = Component.extend( extendOptions );
 			// register component on Ctor
 			for ( let i in cps ) {
 				Ctor.component( i, cps[ i ]._Ctor )

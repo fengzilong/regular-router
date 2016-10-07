@@ -1132,6 +1132,17 @@ var link = function (Regular) {
 	});
 }
 
+// maybe Regular or extended from Regular, either is ok
+var _Component;
+
+var setCtor = function (Component) {
+	_Component = Component;
+};
+
+var getCtor = function () {
+	return _Component;
+};
+
 function each( obj, fn ) {
 	var keys = Object.keys( obj );
 	for ( var i = 0, len = keys.length; i < len; i++ ) {
@@ -1153,6 +1164,7 @@ function walk( obj, fn, name ) {
 }
 
 function digestComponentDeps( routes ) {
+	var Component = getCtor();
 	var dirty = false;
 	var ttl = 20;
 
@@ -1160,7 +1172,7 @@ function digestComponentDeps( routes ) {
 	function walkComponents( extendOptions ) {
 		// first and no deps
 		if ( !extendOptions.components && !extendOptions._Ctor ) {
-			extendOptions._Ctor = Regular.extend( extendOptions );
+			extendOptions._Ctor = Component.extend( extendOptions );
 			return;
 		}
 
@@ -1176,7 +1188,7 @@ function digestComponentDeps( routes ) {
 		}
 
 		if ( isReady ) {
-			var Ctor = Regular.extend( extendOptions );
+			var Ctor = Component.extend( extendOptions );
 			// register component on Ctor
 			for ( var i$1 in cps ) {
 				Ctor.component( i$1, cps[ i$1 ]._Ctor )
@@ -1255,13 +1267,10 @@ var checkPurview = function ( e, cmd, components, cb ) {
 	}
 };
 
-// maybe Regular or extended from Regular, either is ok
-var Regular$1;
-
 var Router = function Router( options ) {
 	// directly call
 	if ( !( this instanceof Router ) ) {
-		Regular$1 = options;
+		setCtor( options );
 		return;
 	}
 
@@ -1272,16 +1281,21 @@ Router.prototype.start = function start ( selector ) {
 	var rootNode =
 		( selector && document.querySelector( selector ) ) ||
 		document.body;
+	var Component = getCtor();
+
+	if ( !Component ) {
+		throw new Error( 'regular-router not initialized yet' );
+	}
 
 	// make stateman avaiable for all Regular instances
 	var stateman = new index();
-	Regular$1.implement({
+	Component.implement({
 		$router: stateman
 	});
 
 	// register helper components
-	Regular$1.use( view );
-	Regular$1.use( link );
+	Component.use( view );
+	Component.use( link );
 
 	// get routes from options.routes
 	var ref = this._options;
