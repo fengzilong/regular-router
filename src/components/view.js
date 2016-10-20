@@ -1,7 +1,7 @@
 // import CircularJSON from '../utils/circular-json';
 
-export default Regular => {
-	const RouterView = Regular.extend( {
+export default Component => {
+	const RouterView = Component.extend( {
 		name: 'router-view',
 		template: `
 			<i ref="v"></i>
@@ -36,7 +36,7 @@ export default Regular => {
 		render( component ) {
 			const comment = this._comment;
 			if ( !this._commentInserted ) {
-				Regular.dom.inject( comment, this.$refs.v, 'after' );
+				insertAfter( comment, this.$refs.v );
 				this._commentInserted = true;
 			}
 
@@ -56,4 +56,14 @@ export default Regular => {
 			this._prevcomponent = component;
 		}
 	} );
+};
+
+function insertAfter( node, refer ) {
+	let next = refer.nextSibling;
+
+	if( next ){
+		next.parentNode.insertBefore( node, next );
+	} else {
+		refer.parentNode.appendChild( node );
+	}
 }

@@ -1069,8 +1069,8 @@ var index = StateMan;
 
 // import CircularJSON from '../utils/circular-json';
 
-var view = function (Regular) {
-	var RouterView = Regular.extend( {
+var view = function (Component) {
+	var RouterView = Component.extend( {
 		name: 'router-view',
 		template: "\n\t\t\t<i ref=\"v\"></i>\n\t\t",
 		config: function config() {
@@ -1103,7 +1103,7 @@ var view = function (Regular) {
 		render: function render( component ) {
 			var comment = this._comment;
 			if ( !this._commentInserted ) {
-				Regular.dom.inject( comment, this.$refs.v, 'after' );
+				insertAfter( comment, this.$refs.v );
 				this._commentInserted = true;
 			}
 
@@ -1123,6 +1123,16 @@ var view = function (Regular) {
 			this._prevcomponent = component;
 		}
 	} );
+}
+
+function insertAfter( node, refer ) {
+	var next = refer.nextSibling;
+
+	if( next ){
+		next.parentNode.insertBefore( node, next );
+	} else {
+		refer.parentNode.appendChild( node );
+	}
 }
 
 var link = function (Regular) {
