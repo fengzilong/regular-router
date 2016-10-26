@@ -1353,14 +1353,14 @@ Router.prototype.start = function start ( selector ) {
 		}
 
 		transformedRoutes[ name ] = {
-			url: route.url,
+			url: route.path || route.url,
 			update: function update( e ) {
 				// reuse, do nothing
 			},
 			enter: function enter( e ) {
 				console.log( '@@route', name, 'enter' );
+					
 				var current = e.current;
-
 				var instanceMap = {};
 
 				// initialize component ctors

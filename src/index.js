@@ -78,14 +78,14 @@ class Router {
 			}
 
 			transformedRoutes[ name ] = {
-				url: route.url,
+				url: route.path || route.url,
 				update( e ) {
 					// reuse, do nothing
 				},
 				enter( e ) {
 					console.log( '@@route', name, 'enter' );
+					
 					const current = e.current;
-
 					const instanceMap = {};
 
 					// initialize component ctors
