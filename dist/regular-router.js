@@ -1087,7 +1087,7 @@ var view = function (Component) {
 
 			// console.log( '>', name, CircularJSON.parse( CircularJSON.stringify( $router.current ) ) );
 
-			this.$mute();
+			this.$mute( true );
 		},
 		init: function init() {
 			if( !this._comment ) {
@@ -1098,6 +1098,18 @@ var view = function (Component) {
 			if( this._prevcomponent ) {
 				this._prevcomponent.$inject( false );
 				this._prevcomponent.destroy();
+			}
+		},
+		update: function update() {
+			var prevComponent = this._prevcomponent;
+			if ( prevComponent ) {
+				if (
+					prevComponent.route &&
+					typeof prevComponent.route.update === 'function'
+				) {
+					prevComponent.route.update.call( prevComponent );
+				}
+				prevComponent.$update();
 			}
 		},
 		render: function render( component ) {
@@ -1246,7 +1258,7 @@ function digestComponentDeps( routes ) {
 	digestOne();
 }
 
-var checkPurview = function ( e, cmd, components, cb ) {
+var checkPurview = function ( e, hookName, components, cb ) {
 	var done = e.async();
 	var current = e.current;
 	var go = e.go;
@@ -1264,7 +1276,7 @@ var checkPurview = function ( e, cmd, components, cb ) {
 
 	for ( var i in components ) {
 		var component = components[ i ];
-		var canTransition = component.route && component.route[ cmd ];
+		var canTransition = component.route && component.route[ hookName ];
 		if ( !canTransition ) {
 			next();
 		} else {
@@ -1352,14 +1364,31 @@ Router.prototype.start = function start ( selector ) {
 			components[ 'default' ] = component;
 		}
 
+		// fallback to route.url
+		var url = route.path;
+		if ( typeof url === 'undefined' ) {
+			url = route.url;
+		}
+
 		transformedRoutes[ name ] = {
-			url: route.path || route.url,
+			url: url,
 			update: function update( e ) {
-				// reuse, do nothing
+				console.log( '@@route', name, 'update' );
+
+				var current = e.current;
+				var routerViews = routerViewStack[ parentName ];
+
+				// update router-view
+				if ( routerViews ) {
+					for ( var i in routerViews ) {
+						var routerView = routerViews[ i ];
+						routerView.update();
+					}
+				}
 			},
 			enter: function enter( e ) {
 				console.log( '@@route', name, 'enter' );
-					
+
 				var current = e.current;
 				var instanceMap = {};
 

@@ -77,14 +77,31 @@ class Router {
 				components[ 'default' ] = component;
 			}
 
+			// fallback to route.url
+			let url = route.path;
+			if ( typeof url === 'undefined' ) {
+				url = route.url;
+			}
+
 			transformedRoutes[ name ] = {
-				url: route.path || route.url,
+				url: url,
 				update( e ) {
-					// reuse, do nothing
+					console.log( '@@route', name, 'update' );
+
+					const current = e.current;
+					const routerViews = routerViewStack[ parentName ];
+
+					// update router-view
+					if ( routerViews ) {
+						for ( let i in routerViews ) {
+							const routerView = routerViews[ i ];
+							routerView.update();
+						}
+					}
 				},
 				enter( e ) {
 					console.log( '@@route', name, 'enter' );
-					
+
 					const current = e.current;
 					const instanceMap = {};
 

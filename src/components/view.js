@@ -20,7 +20,7 @@ export default Component => {
 
 			// console.log( '>', name, CircularJSON.parse( CircularJSON.stringify( $router.current ) ) );
 
-			this.$mute();
+			this.$mute( true );
 		},
 		init() {
 			if( !this._comment ) {
@@ -31,6 +31,18 @@ export default Component => {
 			if( this._prevcomponent ) {
 				this._prevcomponent.$inject( false );
 				this._prevcomponent.destroy();
+			}
+		},
+		update() {
+			const prevComponent = this._prevcomponent;
+			if ( prevComponent ) {
+				if (
+					prevComponent.route &&
+					typeof prevComponent.route.update === 'function'
+				) {
+					prevComponent.route.update.call( prevComponent );
+				}
+				prevComponent.$update();
 			}
 		},
 		render( component ) {

@@ -20,7 +20,6 @@
 					<router-view></router-view>
 				`,
 				config() {
-					// console.log( 'App config called' );
 				}
 			};
 
@@ -61,17 +60,16 @@
 				`,
 				config() {
 					this.data.count = 0;
-					// console.log( 'Counter config called' );
 				},
 				route: {
 					canEnter( { route, redirect, next } ) {
-						// redirect( url ), for human, url is more understandable
+						// redirect( url )
 						console.log( 'auth' );
 						next();
 					},
 					canLeave( { next } ) {
 						next();
-					}
+					},
 				},
 				onAdd() {
 					this.data.count++;
@@ -81,12 +79,45 @@
 				}
 			};
 
+			const DetailParent = {
+				template: `
+					<router-view></router-view>
+				`,
+			}
+			const Detail = {
+				template: `
+					<div class="detail">{ detailId }</div>
+				`,
+				route: {
+					update() {
+						this.data.detailId = this.$router.current.param.id;
+						this.$update();
+					},
+				},
+				init() {
+					this.data.detailId = this.$router.current.param.id;
+					this.$update();
+				},
+			}
+
 			// app -> App -> default + aaa
 			// counter -> ↑ && display -> ↑
 			// counter -> Counter -> lll
 
 			const router = new regularRouter({
 				routes: [
+					{
+						name: 'detailparent',
+						url: '/dp',
+						component: DetailParent,
+						children: [
+							{
+								name: 'detail',
+								url: '/detail/:id',
+								component: Detail,
+							},
+						]
+					},
 					{
 						name: 'app',
 						url: '/app',

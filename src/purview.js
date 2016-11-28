@@ -1,4 +1,4 @@
-const checkPurview = ( e, cmd, components, cb ) => {
+const checkPurview = ( e, hookName, components, cb ) => {
 	const done = e.async();
 	const current = e.current;
 	const go = e.go;
@@ -16,7 +16,7 @@ const checkPurview = ( e, cmd, components, cb ) => {
 
 	for ( let i in components ) {
 		const component = components[ i ];
-		const canTransition = component.route && component.route[ cmd ];
+		const canTransition = component.route && component.route[ hookName ];
 		if ( !canTransition ) {
 			next();
 		} else {
