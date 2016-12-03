@@ -1387,6 +1387,7 @@ Router.prototype.start = function start ( selector ) {
 				}
 			},
 			enter: function enter( e ) {
+				// check routerViews when route enters
 				console.log( '@@route', name, 'enter' );
 
 				var current = e.current;
@@ -1418,8 +1419,9 @@ Router.prototype.start = function start ( selector ) {
 					}
 				}
 
-				if ( route.isRootRoute ) {
-					instanceMap[ 'default' ] && instanceMap[ 'default' ].$inject( rootNode );
+				if ( route.isRootRoute && instanceMap.default ) {
+					routeMap[ name ].rootInstance = instanceMap.default;
+					instanceMap.default.$inject( rootNode );
 				}
 			},
 			canEnter: function canEnter( e ) {
@@ -1431,15 +1433,22 @@ Router.prototype.start = function start ( selector ) {
 			leave: function leave( e ) {
 				console.log( '@@route', name, 'leave' );
 
-				var current = e.current;
+				// clean routerViews
 				var routerViews = routerViewStack[ parentName ];
-
-				// clean router-view
 				if ( routerViews ) {
 					for ( var i in routerViews ) {
 						var routerView = routerViews[ i ];
 						routerView.clear();
 					}
+				}
+
+				// if root route changes, destroy related root component
+				if (
+					routeMap[ name ].isRootRoute &&
+					routeMap[ name ].rootInstance
+				) {
+					routeMap[ name ].rootInstance.$inject( false );
+					routeMap[ name ].rootInstance = null;
 				}
 			}
 		};

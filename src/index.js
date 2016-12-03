@@ -100,6 +100,7 @@ class Router {
 					}
 				},
 				enter( e ) {
+					// check routerViews when route enters
 					console.log( '@@route', name, 'enter' );
 
 					const current = e.current;
@@ -131,8 +132,9 @@ class Router {
 						}
 					}
 
-					if ( route.isRootRoute ) {
-						instanceMap[ 'default' ] && instanceMap[ 'default' ].$inject( rootNode );
+					if ( route.isRootRoute && instanceMap.default ) {
+						routeMap[ name ].rootInstance = instanceMap.default;
+						instanceMap.default.$inject( rootNode );
 					}
 				},
 				canEnter( e ) {
@@ -144,15 +146,22 @@ class Router {
 				leave( e ) {
 					console.log( '@@route', name, 'leave' );
 
-					const current = e.current;
+					// clean routerViews
 					const routerViews = routerViewStack[ parentName ];
-
-					// clean router-view
 					if ( routerViews ) {
 						for ( let i in routerViews ) {
 							const routerView = routerViews[ i ];
 							routerView.clear();
 						}
+					}
+
+					// if root route changes, destroy related root component
+					if (
+						routeMap[ name ].isRootRoute &&
+						routeMap[ name ].rootInstance
+					) {
+						routeMap[ name ].rootInstance.$inject( false );
+						routeMap[ name ].rootInstance = null;
 					}
 				}
 			};
