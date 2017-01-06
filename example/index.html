@@ -167,13 +167,18 @@
 				]
 			});
 
-			// router.beforeEach(function( transition ) {
-			//
-			// });
+			router.notfound( function() {
+				console.log( 'not found' );
+				location.href = '#!/app/counter/ccc';
+			} );
 
-			// router.afterEach(function( transition ) {
-			//
-			// });
+			router.beforeEach( function( e ) {
+				console.log( 'before each' );
+			} );
+
+			router.afterEach( function() {
+				console.log( 'after each' );
+			} );
 
 			router.start( '#app' );
 		</script>

@@ -18,6 +18,18 @@ class Router {
 		// new
 		this._options = options;
 	}
+	notfound( fn ) {
+		const router = this.instance();
+		router.on( 'notfound', fn );
+	}
+	beforeEach( fn ) {
+		const router = this.instance();
+		router.on( 'begin', fn );
+	}
+	afterEach( fn ) {
+		const router = this.instance();
+		router.on( 'end', fn );
+	}
 	instance() {
 		if ( !this.router ) {
 			this.router = new Stateman();

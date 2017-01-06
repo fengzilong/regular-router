@@ -1299,6 +1299,18 @@ var Router = function Router( options ) {
 	// new
 	this._options = options;
 };
+Router.prototype.notfound = function notfound ( fn ) {
+	var router = this.instance();
+	router.on( 'notfound', fn );
+};
+Router.prototype.beforeEach = function beforeEach ( fn ) {
+	var router = this.instance();
+	router.on( 'begin', fn );
+};
+Router.prototype.afterEach = function afterEach ( fn ) {
+	var router = this.instance();
+	router.on( 'end', fn );
+};
 Router.prototype.instance = function instance () {
 	if ( !this.router ) {
 		this.router = new index();
