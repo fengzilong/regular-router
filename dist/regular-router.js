@@ -16,20 +16,20 @@ var slice = [].slice, o2str = ({}).toString;
 // merge o2's properties to Object o1. 
 _.extend = function(o1, o2, override){
   for(var i in o2) { if(override || o1[i] === undefined){
-    o1[i] = o2[i]
+    o1[i] = o2[i];
   } }
   return o1;
-}
+};
 
 
 
 _.slice = function(arr, index){
   return slice.call(arr, index);
-}
+};
 
 _.typeOf = function typeOf (o) {
   return o == null ? String(o) : o2str.call(o).slice(8, -1).toLowerCase();
-}
+};
 
 //strict eql
 _.eql = function(o1, o2){
@@ -44,7 +44,7 @@ _.eql = function(o1, o2){
     return equal;
   }
   return o1 === o2;
-}
+};
 
 
 // small emitter 
@@ -56,9 +56,9 @@ _.emitable = (function(){
   var API = {
     once: function(event, fn){
       var callback = function(){
-        fn.apply(this, arguments)
-        this.off(event, callback)
-      }
+        fn.apply(this, arguments);
+        this.off(event, callback);
+      };
       return this.on(event, callback)
     },
     on: function(event, fn) {
@@ -113,11 +113,11 @@ _.emitable = (function(){
       if (!handles || !(calls = handles[event])) { return this; }
       for (var i = 0, len = calls.length; i < len; i++) {
         var fn = calls[i];
-        if( !ne.namespace || fn._ns === ne.namespace ) { fn.apply(this$1, args) }
+        if( !ne.namespace || fn._ns === ne.namespace ) { fn.apply(this$1, args); }
       }
       return this;
     }
-  }
+  };
   return function(obj){
       obj = typeof obj == "function" ? obj.prototype : obj;
       return _.extend(obj, API)
@@ -130,14 +130,14 @@ _.bind = function(fn, context){
   return function(){
     return fn.apply(context, arguments);
   }
-}
+};
 
 var rDbSlash = /\/+/g, // double slash
   rEndSlash = /\/$/;    // end slash
 
 _.cleanPath = function (path){
   return ("/" + path).replace( rDbSlash,"/" ).replace( rEndSlash, "" ) || "/";
-}
+};
 
 // normalize the path
 function normalizePath(path) {
@@ -159,7 +159,7 @@ function normalizePath(path) {
         preIndex = startAt + all.length;
         if( key ){
           matches += "(" + key + ")";
-          keys.push(key)
+          keys.push(key);
           return "("+( keyformat || "[\\w-]+")+")";
         }
         matches += "(" + index + ")";
@@ -172,9 +172,9 @@ function normalizePath(path) {
         } 
         if(mwild) { return "(.*)"; }
         if(swild) { return "([^\\/]*)"; }
-    })
+    });
 
-  if(preIndex !== path.length) { matches += path.slice(preIndex) }
+  if(preIndex !== path.length) { matches += path.slice(preIndex); }
 
   return {
     regexp: new RegExp("^" + regStr +"/?$"),
@@ -184,14 +184,14 @@ function normalizePath(path) {
 }
 
 _.log = function(msg, type){
-  typeof console !== "undefined" && console[type || "log"](msg)
-}
+  typeof console !== "undefined" && console[type || "log"](msg);
+};
 
 _.isPromise = function( obj ){
 
   return !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
 
-}
+};
 
 
 
@@ -220,7 +220,7 @@ _$1.extend( _$1.emitable( State$1 ), {
 
     if(_$1.typeOf(stateName) === "object"){
       for(var i in stateName){
-        this$1.state(i, stateName[i])
+        this$1.state(i, stateName[i]);
       }
       return this;
     }
@@ -244,7 +244,7 @@ _$1.extend( _$1.emitable( State$1 ), {
           manager: current.manager || current,
           name: stack.join("."),
           currentName: nextName
-        })
+        });
         current.hasNext = true;
         next.configUrl();
       }
@@ -276,7 +276,7 @@ _$1.extend( _$1.emitable( State$1 ), {
           }
           break;
         case "events": 
-          this$1.on(prop)
+          this$1.on(prop);
           break;
         default:
           this$1[i] = prop;
@@ -339,7 +339,7 @@ _$1.extend( _$1.emitable( State$1 ), {
 
       var param = {};
       for(var i =0,len=keys.length;i<len;i++){
-        param[keys[i]] = matched[i+1] 
+        param[keys[i]] = matched[i+1]; 
       }
       return param;
     }else{
@@ -352,7 +352,7 @@ _$1.extend( _$1.emitable( State$1 ), {
     throw new Error( 'please use option.async instead')
   }
 
-})
+});
 
 
 var state = State$1;
@@ -375,7 +375,7 @@ var b = module.exports = {
   off: "removeEventListener" in win ? 
       function(node,type,cb){return node.removeEventListener( type, cb )}
     : function(node,type,cb){return node.detachEvent( "on" + type, cb )}
-}
+};
 });
 
 // MIT
@@ -456,8 +456,8 @@ _$2.extend( _$2.emitable(Histery$1), {
   // the history teardown
   stop: function(){
 
-    browser.off(window, 'hashchange', this._checkPath)  
-    browser.off(window, 'popstate', this._checkPath)  
+    browser.off(window, 'hashchange', this._checkPath);  
+    browser.off(window, 'popstate', this._checkPath);  
     clearTimeout(this.tid);
     this.isStart = false;
     this._checkPath = null;
@@ -507,13 +507,13 @@ _$2.extend( _$2.emitable(Histery$1), {
 
     // 3 or 1 is matched
     if( this.mode !== HISTORY ){
-      this._setHash(this.location, to, options.replace)
+      this._setHash(this.location, to, options.replace);
       if( iframe && this.getPath(iframe.location) !== to ){
         if(!options.replace) { iframe.document.open().close(); }
-        this._setHash(this.iframe.location, to, options.replace)
+        this._setHash(this.iframe.location, to, options.replace);
       }
     }else{
-      history[options.replace? 'replaceState': 'pushState']( {}, options.title || "" , _$2.cleanPath( this.root + to ) )
+      history[options.replace? 'replaceState': 'pushState']( {}, options.title || "" , _$2.cleanPath( this.root + to ) );
     }
 
     if( !options.silent ) { this.emit('change', to); }
@@ -533,9 +533,9 @@ _$2.extend( _$2.emitable(Histery$1), {
       if(!hash) { return; }
       
       ev.preventDefault && ev.preventDefault();
-      self.nav( hash )
+      self.nav( hash );
       return (ev.returnValue = false);
-    } )
+    } );
   },
   _setHash: function(location, path, replace){
     var href = location.href.replace(/(javascript:|#).*$/, '');
@@ -561,13 +561,13 @@ _$2.extend( _$2.emitable(Histery$1), {
     // dont support history popstate but config the html5 mode
     if( this.mode !== HISTORY && this.html5){
 
-      hashInPathName = pathname.replace(this.rRoot, "")
+      hashInPathName = pathname.replace(this.rRoot, "");
       if(hashInPathName) { this.location.replace(this.root + this.prefix + hashInPathName); }
 
     }else if( this.mode === HISTORY /* && pathname === this.root*/){
 
       hash = this.location.hash.replace(this.prefix, "");
-      if(hash) { history.replaceState({}, document.title, _$2.cleanPath(this.root + hash)) }
+      if(hash) { history.replaceState({}, document.title, _$2.cleanPath(this.root + hash)); }
 
     }
   },
@@ -584,7 +584,7 @@ _$2.extend( _$2.emitable(Histery$1), {
     this.iframe.location.hash = '#' + path;
   }
   
-})
+});
 
 
 
@@ -618,7 +618,7 @@ function StateMan$1(options){
       cur = cur.parent;
     }
     document.title = typeof title === "function"? cur.title(): String( title || baseTitle ) ;
-  })
+  });
 
 }
 
@@ -631,7 +631,7 @@ _.extend( _.emitable( StateMan$1 ), {
 
       var active = this.active;
       if(typeof stateName === "string" && active){
-         stateName = stateName.replace("~", active.name)
+         stateName = stateName.replace("~", active.name);
          if(active.parent) { stateName = stateName.replace("^", active.parent.name || ""); }
       }
       // ^ represent current.parent
@@ -666,7 +666,7 @@ _.extend( _.emitable( StateMan$1 ), {
       }
 
       if(option.encode !== false){
-        var url = state$$1.encode(option.param)
+        var url = state$$1.encode(option.param);
         option.path = url;
         this.nav(url, {silent: true, replace: option.replace});
       }
@@ -685,7 +685,7 @@ _.extend( _.emitable( StateMan$1 ), {
       options.path = url;
 
       this.history.nav( url, _.extend({silent: true}, options));
-      if(!options.silent) { this._afterPathChange( _.cleanPath(url) , options , callback) }
+      if(!options.silent) { this._afterPathChange( _.cleanPath(url) , options , callback); }
 
       return this;
     },
@@ -789,7 +789,7 @@ _.extend( _.emitable( StateMan$1 ), {
         option.stop = function(){
           done(false);
           self.nav( prepath? prepath: "/", {silent:true});
-        }
+        };
         self.emit("begin", option);
 
       }
@@ -804,16 +804,16 @@ _.extend( _.emitable( StateMan$1 ), {
 
           if( notRejected===false ){
             // if reject in callForPermission, we will return to old 
-            prepath && this.nav( prepath, {silent: true})
+            prepath && this.nav( prepath, {silent: true});
 
-            done(false, 2)
+            done(false, 2);
 
             return this.emit('abort', option);
 
           } 
 
           // stop previous pending.
-          if(this.pending) { this.pending.stop() } 
+          if(this.pending) { this.pending.stop(); } 
           this.pending = option;
           this.path = option.path;
           this.current = option.current;
@@ -824,7 +824,7 @@ _.extend( _.emitable( StateMan$1 ), {
 
             if( notRejected === false ){
               this.current = this.active;
-              done(false)
+              done(false);
               return this.emit('abort', option);
             }
 
@@ -834,9 +834,9 @@ _.extend( _.emitable( StateMan$1 ), {
             option.phase = 'completion';
             return done()
 
-          }, this) )
+          }, this) );
 
-        }, this) )
+        }, this) );
 
       }else{
         self._checkQueryAndParam(baseState, option);
@@ -856,7 +856,7 @@ _.extend( _.emitable( StateMan$1 ), {
       if(!len) { return; }
 
       for(var i = 0; i < len; i++){
-        stash[i].call(this$1, option)
+        stash[i].call(this$1, option);
       }
     },
 
@@ -874,12 +874,12 @@ _.extend( _.emitable( StateMan$1 ), {
         if( notRejected === false ) { return callback( notRejected ); }
 
         // only actual transiton need update base state;
-        if( !callForPermit )  { this._checkQueryAndParam(parent, option) }
+        if( !callForPermit )  { this._checkQueryAndParam(parent, option); }
 
         option.basckward = false;
-        this._transit( parent, to, option, callForPermit,  callback)
+        this._transit( parent, to, option, callForPermit,  callback);
 
-      }, this) )
+      }, this) );
 
     },
 
@@ -928,7 +928,7 @@ _.extend( _.emitable( StateMan$1 ), {
         isPending = true;
 
         return done;
-      }
+      };
 
       function done( notRejected ){
         if( isDone ) { return; }
@@ -941,7 +941,7 @@ _.extend( _.emitable( StateMan$1 ), {
 
       option.stop = function(){
         done( false );
-      }
+      };
 
 
       this.active = applied;
@@ -958,14 +958,14 @@ _.extend( _.emitable( StateMan$1 ), {
       }
 
       // if haven't call option.async yet
-      if( !isPending ) { done( retValue ) }
+      if( !isPending ) { done( retValue ); }
 
     },
 
 
     _wrapPromise: function( promise, next ){
 
-      return promise.then( next, function(){next(false)}) ;
+      return promise.then( next, function(){next(false);}) ;
 
     },
 
@@ -974,8 +974,8 @@ _.extend( _.emitable( StateMan$1 ), {
       var fname = from.name;
       var tname = to.name;
 
-      var tsplit = tname.split('.')
-      var fsplit = fname.split('.')
+      var tsplit = tname.split('.');
+      var fsplit = fname.split('.');
 
       var tlen = tsplit.length;
       var flen = fsplit.length;
@@ -1054,7 +1054,7 @@ _.extend( _.emitable( StateMan$1 ), {
 
     }
 
-}, true)
+}, true);
 
 
 
@@ -1135,7 +1135,7 @@ var view = function (Component) {
 			this._prevcomponent = component;
 		}
 	} );
-}
+};
 
 function insertAfter( node, refer ) {
 	var next = refer.nextSibling;
@@ -1152,7 +1152,7 @@ var link = function (Regular) {
 		name: 'router-link',
 		template: "\n\t\t\t<a href=\"{ to }\">{#inc this.$body}</a>\n\t\t"
 	});
-}
+};
 
 // maybe Regular or extended from Regular, either is ok
 var _Component;
@@ -1213,7 +1213,7 @@ function digestComponentDeps( routes ) {
 			var Ctor = Component.extend( extendOptions );
 			// register component on Ctor
 			for ( var i$1 in cps ) {
-				Ctor.component( i$1, cps[ i$1 ]._Ctor )
+				Ctor.component( i$1, cps[ i$1 ]._Ctor );
 			}
 			extendOptions._Ctor = Ctor;
 			return;
@@ -1299,18 +1299,22 @@ var Router = function Router( options ) {
 	// new
 	this._options = options;
 };
+Router.prototype.instance = function instance () {
+	if ( !this.router ) {
+		this.router = new index();
+	}
+	return this.router;
+};
 Router.prototype.start = function start ( selector ) {
-	var rootNode =
-		( selector && document.querySelector( selector ) ) ||
-		document.body;
 	var Component = getCtor();
-
 	if ( !Component ) {
 		throw new Error( 'regular-router not initialized yet' );
 	}
 
+	var rootNode = document.querySelector( selector || 'body' );
+
 	// make stateman avaiable for all Regular instances
-	var stateman = new index();
+	var stateman = this.instance();
 	Component.implement({
 		$router: stateman
 	});
@@ -1332,7 +1336,6 @@ Router.prototype.start = function start ( selector ) {
 		routeMap[ name ] = route;
 	} );
 
-	// digest components dependencies
 	digestComponentDeps( routes );
 
 	var routerViewStack = {};
@@ -1345,13 +1348,9 @@ Router.prototype.start = function start ( selector ) {
 			routerViewStack[ phase ] = routerViewStack[ phase ] || {};
 			routerViewStack[ phase ][ key ] = value;
 		},
-		// 'purge-router-view': function( { phase } ) {
-		// routerViewStack[ phase ] = {};
-		// }
 	} );
 
-	// transform routes
-	var transformedRoutes = {};
+	var transformed = {};
 	var loop = function ( name ) {
 		var route = routeMap[ name ];
 		var parentName = name.split( '.' ).slice( 0, -1 ).join( '.' );
@@ -1364,38 +1363,17 @@ Router.prototype.start = function start ( selector ) {
 			components[ 'default' ] = component;
 		}
 
-		// fallback to route.url
-		var url = route.path;
-		if ( typeof url === 'undefined' ) {
-			url = route.url;
-		}
-
-		transformedRoutes[ name ] = {
-			url: url,
-			update: function update( e ) {
-				console.log( '@@route', name, 'update' );
-
-				var current = e.current;
-				var routerViews = routerViewStack[ parentName ];
-
-				// update router-view
-				if ( routerViews ) {
-					for ( var i in routerViews ) {
-						var routerView = routerViews[ i ];
-						routerView.update();
-					}
-				}
+		transformed[ name ] = {
+			url: route.path,
+			update: function update() {
+				var routerViews = routerViewStack[ parentName ] || {};
+				each( routerViews, function (v) { return v.update(); } );
 			},
 			enter: function enter( e ) {
 				// check routerViews when route enters
-				console.log( '@@route', name, 'enter' );
-
-				var current = e.current;
 				var instanceMap = {};
 
-				// initialize component ctors
 				CtorMap[ name ] = {};
-
 				for ( var i in components ) {
 					var cp = components[ i ];
 					CtorMap[ name ][ i ] = cp._Ctor;
@@ -1411,7 +1389,7 @@ Router.prototype.start = function start ( selector ) {
 
 				var routerViews = routerViewStack[ parentName ];
 
-				// render router-view
+				// render
 				if ( routerViews ) {
 					for ( var i$2 in routerViews ) {
 						var routerView = routerViews[ i$2 ];
@@ -1431,9 +1409,7 @@ Router.prototype.start = function start ( selector ) {
 				checkPurview( e, 'canLeave', components );
 			},
 			leave: function leave( e ) {
-				console.log( '@@route', name, 'leave' );
-
-				// clean routerViews
+				// clean
 				var routerViews = routerViewStack[ parentName ];
 				if ( routerViews ) {
 					for ( var i in routerViews ) {
@@ -1456,7 +1432,7 @@ Router.prototype.start = function start ( selector ) {
 
 		for ( var name in routeMap ) loop( name );
 
-	stateman.state( transformedRoutes );
+	stateman.state( transformed );
 
 	stateman.start( {
 		prefix: '!'

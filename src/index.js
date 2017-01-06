@@ -2,6 +2,7 @@ import Stateman from 'stateman';
 import view from './components/view';
 import link from './components/link';
 import { setCtor, getCtor } from './ctor';
+import each from './utils/each';
 import walk from './walk';
 import digest from './digest';
 import checkPurview from './purview';
@@ -17,18 +18,22 @@ class Router {
 		// new
 		this._options = options;
 	}
+	instance() {
+		if ( !this.router ) {
+			this.router = new Stateman();
+		}
+		return this.router;
+	}
 	start( selector ) {
-		const rootNode =
-			( selector && document.querySelector( selector ) ) ||
-			document.body;
 		const Component = getCtor();
-
 		if ( !Component ) {
 			throw new Error( 'regular-router not initialized yet' );
 		}
 
+		const rootNode = document.querySelector( selector || 'body' );
+
 		// make stateman avaiable for all Regular instances
-		const stateman = new Stateman();
+		const stateman = this.instance();
 		Component.implement({
 			$router: stateman
 		});
@@ -49,22 +54,17 @@ class Router {
 			routeMap[ name ] = route;
 		} );
 
-		// digest components dependencies
 		digest( routes );
 
-		let routerViewStack = {};
+		const routerViewStack = {};
 		stateman.on( {
 			'add-router-view': function( { phase, key, value } ) {
 				routerViewStack[ phase ] = routerViewStack[ phase ] || {};
 				routerViewStack[ phase ][ key ] = value;
 			},
-			// 'purge-router-view': function( { phase } ) {
-			// 	routerViewStack[ phase ] = {};
-			// }
 		} );
 
-		// transform routes
-		const transformedRoutes = {};
+		const transformed = {};
 		for ( let name in routeMap ) {
 			const route = routeMap[ name ];
 			const parentName = name.split( '.' ).slice( 0, -1 ).join( '.' );
@@ -77,38 +77,17 @@ class Router {
 				components[ 'default' ] = component;
 			}
 
-			// fallback to route.url
-			let url = route.path;
-			if ( typeof url === 'undefined' ) {
-				url = route.url;
-			}
-
-			transformedRoutes[ name ] = {
-				url: url,
-				update( e ) {
-					console.log( '@@route', name, 'update' );
-
-					const current = e.current;
-					const routerViews = routerViewStack[ parentName ];
-
-					// update router-view
-					if ( routerViews ) {
-						for ( let i in routerViews ) {
-							const routerView = routerViews[ i ];
-							routerView.update();
-						}
-					}
+			transformed[ name ] = {
+				url: route.path,
+				update() {
+					const routerViews = routerViewStack[ parentName ] || {};
+					each( routerViews, v => v.update() );
 				},
 				enter( e ) {
 					// check routerViews when route enters
-					console.log( '@@route', name, 'enter' );
-
-					const current = e.current;
 					const instanceMap = {};
 
-					// initialize component ctors
 					CtorMap[ name ] = {};
-
 					for ( let i in components ) {
 						const cp = components[ i ];
 						CtorMap[ name ][ i ] = cp._Ctor;
@@ -124,7 +103,7 @@ class Router {
 
 					const routerViews = routerViewStack[ parentName ];
 
-					// render router-view
+					// render
 					if ( routerViews ) {
 						for ( let i in routerViews ) {
 							const routerView = routerViews[ i ];
@@ -144,9 +123,7 @@ class Router {
 					checkPurview( e, 'canLeave', components );
 				},
 				leave( e ) {
-					console.log( '@@route', name, 'leave' );
-
-					// clean routerViews
+					// clean
 					const routerViews = routerViewStack[ parentName ];
 					if ( routerViews ) {
 						for ( let i in routerViews ) {
@@ -167,7 +144,7 @@ class Router {
 			};
 		}
 
-		stateman.state( transformedRoutes );
+		stateman.state( transformed );
 
 		stateman.start( {
 			prefix: '!'
