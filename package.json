@@ -7,6 +7,9 @@
     "dev": "onchange \"src\" -i -v -- npm run build",
     "build": "bubleup ./src/index.js -d dist --format umd --name regular-router"
   },
+  "files": [
+    "dist"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fengzilong/regular-router.git"
