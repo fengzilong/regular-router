@@ -8,10 +8,10 @@ import install from './install';
 import checkPurview from './purview';
 
 class Router {
-	constructor( options ) {
-		// directly invoke ( as plugin )
+	constructor( options, Regular ) {
+		// invoked as plugin
 		if ( !( this instanceof Router ) ) {
-			setCtor( options );
+			setCtor( Regular );
 			return;
 		}
 
