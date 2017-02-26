@@ -4,12 +4,12 @@ import link from './components/link';
 import { setCtor, getCtor } from './ctor';
 import each from './utils/each';
 import walk from './walk';
-import digest from './digest';
+import install from './install';
 import checkPurview from './purview';
 
 class Router {
 	constructor( options ) {
-		// directly call
+		// directly invoke ( as plugin )
 		if ( !( this instanceof Router ) ) {
 			setCtor( options );
 			return;
@@ -66,7 +66,7 @@ class Router {
 			routeMap[ name ] = route;
 		} );
 
-		digest( routes );
+		install( routes );
 
 		const routerViewStack = {};
 		stateman.on( {
