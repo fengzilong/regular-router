@@ -26,6 +26,8 @@
   },
   "homepage": "https://github.com/fengzilong/regular-router#readme",
   "devDependencies": {
+    "bubleup": "^0.5.2",
+    "onchange": "^3.2.1",
     "stateman": "^0.2.0"
   }
 }
