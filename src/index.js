@@ -19,18 +19,18 @@ class Router {
     this._options = options;
   }
   notfound(fn) {
-    const router = this.instance();
+    const router = this._instance();
     router.on('notfound', fn);
   }
   beforeEach(fn) {
-    const router = this.instance();
+    const router = this._instance();
     router.on('begin', fn);
   }
   afterEach(fn) {
-    const router = this.instance();
+    const router = this._instance();
     router.on('end', fn);
   }
-  instance() {
+  _instance() {
     if (!this.router) {
       this.router = new Stateman();
     }
@@ -45,7 +45,7 @@ class Router {
     const rootNode = document.querySelector(selector || 'body');
 
     // make stateman avaiable for all Regular instances
-    const stateman = this.instance();
+    const stateman = this._instance();
     Component.implement({
       $router: stateman,
     });
@@ -77,7 +77,7 @@ class Router {
     });
 
     const transformed = {};
-    for (let name in routeMap) {
+    for (const name in routeMap) {
       const route = routeMap[name];
       const parentName = name.split('.').slice(0, -1).join('.');
       const component = route.component;
