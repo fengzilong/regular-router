@@ -1,4 +1,4 @@
-// import CircularJSON from '../utils/circular-json';
+import {insertAfter} from '../utils/dom';
 
 export default Component => {
   const RouterView = Component.extend({
@@ -15,8 +15,6 @@ export default Component => {
         key: name,
         value: this,
       });
-
-      // console.log( '>', name, CircularJSON.parse( CircularJSON.stringify( $router.current ) ) );
 
       this.$mute(true);
     },
@@ -67,13 +65,3 @@ export default Component => {
     },
   });
 };
-
-function insertAfter(node, refer) {
-  const next = refer.nextSibling;
-
-  if (next) {
-    next.parentNode.insertBefore(node, next);
-  } else {
-    refer.parentNode.appendChild(node);
-  }
-}
