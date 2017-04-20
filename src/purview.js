@@ -17,6 +17,7 @@ const checkPurview = (e, hookName, components, cb) => {
   for (const i in components) {
     const component = components[i];
     const canTransition = component.route && component.route[hookName];
+
     if (!canTransition) {
       next();
     } else {
