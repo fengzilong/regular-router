@@ -39,25 +39,23 @@ class Router {
   start(selector) {
     const Component = getCtor();
     if (!Component) {
-      throw new Error('regular-router not initialized yet');
+      throw new Error('regular-router is not initialized yet');
     }
 
     const rootNode = document.querySelector(selector || 'body');
 
-    // make stateman avaiable for all Regular instances
+    // mount stateman instance as $router
     const stateman = this._instance();
     Component.implement({
       $router: stateman,
     });
 
-    // register helper components
+    // register router-related components
     Component.use(view);
     Component.use(link);
 
-    // get routes from options.routes
     const {routes} = this._options;
 
-    // flat
     const routeMap = {};
     walk(routes, function(route, name) {
       if (!~name.indexOf('.')) {
@@ -84,7 +82,7 @@ class Router {
       const components = route.components || {};
       const CtorMap = {};
 
-      // combine
+      // merge
       if (!components['default'] && component) {
         components['default'] = component;
       }

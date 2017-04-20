@@ -6,7 +6,7 @@ export default install;
 function install(routes) {
   walk(routes, function(route) {
     const components = route.components || {};
-    // combine
+    // merge
     if (route.component) {
       components['default'] = route.component;
     }
