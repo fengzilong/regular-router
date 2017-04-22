@@ -1,4 +1,4 @@
-export {insertAfter};
+export { insertAfter };
 
 function insertAfter(node, refer) {
   const next = refer.nextSibling;

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "onchange \"src\" -i -v -- npm run build",
     "build": "bili --format umd --compress",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "prettier": "prettier src/**/*.js --single-quote --write"
   },
   "lint-staged": {
     "src/**/*.js": [
@@ -37,6 +38,7 @@
     "husky": "^0.13.3",
     "lint-staged": "^3.4.0",
     "onchange": "^3.2.1",
+    "prettier": "^1.2.2",
     "stateman": "^0.2.0"
   }
 }

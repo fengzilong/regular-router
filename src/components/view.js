@@ -1,4 +1,4 @@
-import {insertAfter} from '../utils/dom';
+import { insertAfter } from '../utils/dom';
 
 export default Component => {
   const RouterView = Component.extend({
@@ -13,7 +13,7 @@ export default Component => {
       $router.emit('add-router-view', {
         phase: this.$root.__phase__,
         key: name,
-        value: this,
+        value: this
       });
 
       this.$mute(true);
@@ -62,6 +62,6 @@ export default Component => {
       }
 
       this._prevcomponent = component;
-    },
+    }
   });
 };
