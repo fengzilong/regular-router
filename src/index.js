@@ -1,6 +1,6 @@
 import Stateman from 'stateman';
-import view from './components/view';
-import link from './components/link';
+import View from './components/view';
+import Link from './components/link';
 import {setCtor, getCtor} from './ctor';
 import each from './utils/each';
 import walk from './walk';
@@ -9,28 +9,28 @@ import checkPurview from './purview';
 
 class Router {
   constructor(options, Regular) {
-    // invoked as plugin
+    // use
     if (!(this instanceof Router)) {
       setCtor(Regular);
       return;
     }
 
     // new
-    this._options = options;
+    this._options = options || {};
   }
   notfound(fn) {
-    const router = this._instance();
+    const router = this._getInstance();
     router.on('notfound', fn);
   }
   beforeEach(fn) {
-    const router = this._instance();
+    const router = this._getInstance();
     router.on('begin', fn);
   }
   afterEach(fn) {
-    const router = this._instance();
+    const router = this._getInstance();
     router.on('end', fn);
   }
-  _instance() {
+  _getInstance() {
     if (!this.router) {
       this.router = new Stateman();
     }
@@ -45,14 +45,14 @@ class Router {
     const rootNode = document.querySelector(selector || 'body');
 
     // mount stateman instance as $router
-    const stateman = this._instance();
+    const stateman = this._getInstance();
     Component.implement({
       $router: stateman,
     });
 
     // register router-related components
-    Component.use(view);
-    Component.use(link);
+    Component.use(View);
+    Component.use(Link);
 
     const {routes} = this._options;
 
