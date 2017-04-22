@@ -1,7 +1,6 @@
 import Stateman from 'stateman';
 import View from './components/view';
 import Link from './components/link';
-import {setCtor, getCtor} from './ctor';
 import each from './utils/each';
 import walk from './walk';
 import install from './install';
@@ -11,7 +10,7 @@ class Router {
   constructor(options, Regular) {
     // use
     if (!(this instanceof Router)) {
-      setCtor(Regular);
+      Router._Regular = Regular;
       return;
     }
 
@@ -37,7 +36,8 @@ class Router {
     return this.router;
   }
   start(selector) {
-    const Component = getCtor();
+    const Component = Router._Regular;
+
     if (!Component) {
       throw new Error('regular-router is not initialized yet');
     }
@@ -64,7 +64,7 @@ class Router {
       routeMap[name] = route;
     });
 
-    install(routes);
+    install(Component)(routes);
 
     const routerViewStack = {};
     stateman.on({

@@ -5,7 +5,7 @@
   "main": "dist/regular-router.js",
   "scripts": {
     "dev": "onchange \"src\" -i -v -- npm run build",
-    "build": "bubleup ./src/index.js -d dist --format umd --name regular-router"
+    "build": "bili --format umd --compress"
   },
   "files": [
     "dist"
@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/fengzilong/regular-router#readme",
   "devDependencies": {
-    "bubleup": "^0.5.2",
+    "bili": "^0.14.2",
     "onchange": "^3.2.1",
     "stateman": "^0.2.0"
   }
