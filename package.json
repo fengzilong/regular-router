@@ -5,7 +5,14 @@
   "main": "dist/regular-router.js",
   "scripts": {
     "dev": "onchange \"src\" -i -v -- npm run build",
-    "build": "bili --format umd --compress"
+    "build": "bili --format umd --compress",
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "src/**/*.js": [
+      "prettier --single-quote --write",
+      "git add"
+    ]
   },
   "files": [
     "dist"
@@ -27,6 +34,8 @@
   "homepage": "https://github.com/fengzilong/regular-router#readme",
   "devDependencies": {
     "bili": "^0.14.2",
+    "husky": "^0.13.3",
+    "lint-staged": "^3.4.0",
     "onchange": "^3.2.1",
     "stateman": "^0.2.0"
   }
