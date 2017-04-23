@@ -47,14 +47,14 @@ class Router {
     // mount stateman instance as $router
     const stateman = this._getInstance();
     Component.implement({
-      $router: stateman,
+      $router: stateman
     });
 
     // register router-related components
     Component.use(View);
     Component.use(Link);
 
-    const {routes} = this._options;
+    const { routes } = this._options;
 
     const routeMap = {};
     walk(routes, function(route, name) {
@@ -68,10 +68,10 @@ class Router {
 
     const routerViewStack = {};
     stateman.on({
-      'add-router-view': function({phase, key, value}) {
+      'add-router-view': function({ phase, key, value }) {
         routerViewStack[phase] = routerViewStack[phase] || {};
         routerViewStack[phase][key] = value;
-      },
+      }
     });
 
     const transformed = {};
@@ -98,16 +98,16 @@ class Router {
           const instanceMap = {};
 
           CtorMap[name] = {};
-          for (let i in components) {
+          for (const i in components) {
             const cp = components[i];
             CtorMap[name][i] = cp._Ctor;
           }
 
           // get instances, and routerViews will be mounted
-          for (let i in CtorMap[name]) {
+          for (const i in CtorMap[name]) {
             instanceMap[i] = new CtorMap[name][i]({
               __phase__: name,
-              __view__: i,
+              __view__: i
             });
           }
 
@@ -115,7 +115,7 @@ class Router {
 
           // render
           if (routerViews) {
-            for (let i in routerViews) {
+            for (const i in routerViews) {
               const routerView = routerViews[i];
               routerView.render(instanceMap[i]);
             }
@@ -136,7 +136,7 @@ class Router {
           // clean
           const routerViews = routerViewStack[parentName];
           if (routerViews) {
-            for (let i in routerViews) {
+            for (const i in routerViews) {
               const routerView = routerViews[i];
               routerView.clear();
             }
@@ -147,14 +147,14 @@ class Router {
             routeMap[name].rootInstance.$inject(false);
             routeMap[name].rootInstance = null;
           }
-        },
+        }
       };
     }
 
     stateman.state(transformed);
 
     stateman.start({
-      prefix: '!',
+      prefix: '!'
     });
   }
 }
