@@ -17,44 +17,60 @@ class Router {
     // new
     this._options = options || {};
   }
+
   notfound(fn) {
     const router = this._getInstance();
     router.on('notfound', fn);
   }
+
   beforeEach(fn) {
     const router = this._getInstance();
     router.on('begin', fn);
   }
+
   afterEach(fn) {
     const router = this._getInstance();
     router.on('end', fn);
   }
+
+  _check() {
+    const Component = Router._Regular;
+
+    if (!Component) {
+      throw new Error('regular-router is not initialized yet');
+    }
+  }
+
   _getInstance() {
     if (!this.router) {
       this.router = new Stateman();
     }
     return this.router;
   }
-  start(selector) {
+
+  // mount stateman instance as $router
+  _inject(stateman) {
     const Component = Router._Regular;
 
-    if (!Component) {
-      throw new Error('regular-router is not initialized yet');
-    }
-
-    const rootNode = document.querySelector(selector || 'body');
-
-    // mount stateman instance as $router
-    const stateman = this._getInstance();
     Component.implement({
       $router: stateman
     });
+  }
 
-    // register router-related components
+  // register router-related components
+  _register() {
+    const Component = Router._Regular;
     Component.use(View);
     Component.use(Link);
+  }
 
-    const { routes } = this._options;
+  _install(routes) {
+    const Component = Router._Regular;
+    install(Component)(routes);
+  }
+
+  _transform(routes, selector) {
+    const stateman = this._getInstance();
 
     const routeMap = {};
     walk(routes, function(route, name) {
@@ -63,8 +79,6 @@ class Router {
       }
       routeMap[name] = route;
     });
-
-    install(Component)(routes);
 
     const routerViewStack = {};
     stateman.on({
@@ -122,6 +136,7 @@ class Router {
           }
 
           if (route.isRootRoute && instanceMap.default) {
+            const rootNode = document.querySelector(selector || 'body');
             routeMap[name].rootInstance = instanceMap.default;
             instanceMap.default.$inject(rootNode);
           }
@@ -151,11 +166,24 @@ class Router {
       };
     }
 
-    stateman.state(transformed);
+    return transformed;
+  }
 
-    stateman.start({
-      prefix: '!'
-    });
+  start(selector) {
+    const { routes } = this._options;
+    const stateman = this._getInstance();
+
+    this._check();
+
+    this._inject(stateman);
+
+    this._register();
+
+    this._install(routes);
+
+    stateman.state(this._transform(routes, selector));
+
+    stateman.start({ prefix: '!' });
   }
 }
 
