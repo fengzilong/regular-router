@@ -1,15 +1,18 @@
 const checkPurview = (e, hookName, components, cb) => {
-  const done = e.async();
-  const current = e.current;
+  const resolve = e.async();
+  const from = e.previous;
+  const to = e.current;
   const go = e.go;
 
   let len = Object.keys(components).length;
 
-  function next() {
+  function next(rst) {
     len--;
 
-    if (len === 0) {
-      done();
+    if (rst === false) {
+      resolve(false);
+    } else if (len === 0) {
+      resolve();
       cb && cb();
     }
   }
@@ -22,9 +25,11 @@ const checkPurview = (e, hookName, components, cb) => {
       next();
     } else {
       canTransition({
-        route: current,
+        from: from,
+        to: to,
+        route: to,
         redirect: go,
-        next,
+        next
       });
     }
   }

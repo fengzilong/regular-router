@@ -7,7 +7,7 @@
     "dev": "onchange \"src\" -i -v -- npm run build",
     "build": "bili --format umd --compress",
     "precommit": "lint-staged",
-    "prettier": "prettier src/**/*.js --single-quote --write"
+    "prettier": "prettier \"src/**/*.js\" --single-quote --write"
   },
   "lint-staged": {
     "src/**/*.js": [
