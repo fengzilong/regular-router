@@ -85,8 +85,13 @@
 				`,
 			}
 			const Detail = {
+				filters: {
+					plus( value ) {
+						return value + '+1';
+					}
+				},
 				template: `
-					<div class="detail">{ detailId }</div>
+					<div class="detail">{ detailId | plus }</div>
 				`,
 				route: {
 					update() {

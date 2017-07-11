@@ -19,7 +19,8 @@ function install(Component) {
 
 function walkComponents(definition, Component) {
   const Ctor = register(definition, Component);
-  const components = definition.components;
+  const components = definition.components || {};
+  const filters = definition.filters || {};
 
   // no dependencies
   if (!components) {
@@ -33,6 +34,11 @@ function walkComponents(definition, Component) {
   for (const name in components) {
     Ctor.component(name, register(components[name], Component));
     walkComponents(components[name], Component);
+  }
+
+  // register filters
+  for (const name in filters) {
+    Ctor.filter(name, filters[name]);
   }
 }
 
