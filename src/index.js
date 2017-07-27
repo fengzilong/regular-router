@@ -10,7 +10,7 @@ class Router {
   constructor(options, Regular) {
     // use
     if (!(this instanceof Router)) {
-      Router._Regular = Regular;
+      Router._Base = options;
       return;
     }
 
@@ -34,7 +34,7 @@ class Router {
   }
 
   _check() {
-    const Component = Router._Regular;
+    const Component = Router._Base;
 
     if (!Component) {
       throw new Error('regular-router is not initialized yet');
@@ -50,7 +50,7 @@ class Router {
 
   // mount stateman instance as $router
   _inject(stateman) {
-    const Component = Router._Regular;
+    const Component = Router._Base;
 
     Component.implement({
       $router: stateman
@@ -59,13 +59,13 @@ class Router {
 
   // register router-related components
   _register() {
-    const Component = Router._Regular;
+    const Component = Router._Base;
     Component.use(View);
     Component.use(Link);
   }
 
   _install(routes) {
-    const Component = Router._Regular;
+    const Component = Router._Base;
     install(Component)(routes);
   }
 
