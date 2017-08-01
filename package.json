@@ -4,8 +4,8 @@
   "description": "stateman based router for regular",
   "main": "dist/regular-router.js",
   "scripts": {
-    "dev": "onchange \"src\" -i -v -- npm run build",
-    "build": "bili --format umd --compress --module-name=RegularRouter",
+    "dev": "bili --watch",
+    "build": "bili",
     "precommit": "lint-staged",
     "prettier": "prettier \"src/**/*.js\" --single-quote --write"
   },
@@ -34,10 +34,9 @@
   },
   "homepage": "https://github.com/fengzilong/regular-router#readme",
   "devDependencies": {
-    "bili": "^0.14.2",
+    "bili": "^0.17.4",
     "husky": "^0.13.3",
     "lint-staged": "^3.4.0",
-    "onchange": "^3.2.1",
     "prettier": "^1.2.2",
     "stateman": "^0.2.0"
   }
