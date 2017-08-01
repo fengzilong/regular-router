@@ -1,23 +1,7 @@
-import walk from './walk';
-
 export default install;
 
-function install(Component) {
-  return function(routes) {
-    walk(routes, function(route) {
-      const components = route.components || {};
-      // merge
-      if (route.component) {
-        components['default'] = route.component;
-      }
-      for (const slotName in components) {
-        walkComponents(components[slotName], Component);
-      }
-    });
-  };
-}
-
-function walkComponents(definition, Component) {
+// install single component
+function install(definition, Component) {
   const Ctor = register(definition, Component);
   const components = definition.components || {};
   const filters = definition.filters || {};
@@ -33,7 +17,7 @@ function walkComponents(definition, Component) {
   // register components
   for (const name in components) {
     Ctor.component(name, register(components[name], Component));
-    walkComponents(components[name], Component);
+    install(components[name], Component);
   }
 
   // register filters

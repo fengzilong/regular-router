@@ -1,0 +1,70 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>demo</title>
+	</head>
+	<body>
+		<div id="app"></div>
+
+		<script src="../dist/regular-router.js"></script>
+		<script src="./regular.js"></script>
+		<script type="text/javascript">
+			Regular.use( RegularRouter );
+
+			const App = {
+				template: `
+					<a href="#!/app/detail/123">123</a>
+					<a href="#!/app">back</a>
+					<section>
+						<router-view></router-view>
+					</section>
+				`,
+			};
+
+			const Detail = {
+				filters: {
+					plus( value ) {
+						return value + '+1';
+					}
+				},
+				template: `
+					detail:
+					<div class="detail">{ detailId | plus }</div>
+				`,
+				config() {
+					console.log( this.$router.param );
+					this.data.detailId = this.$router.param.id;
+				}
+			};
+
+			const router = new RegularRouter({
+				routes: [
+					{
+						name: 'app',
+						path: '/app',
+						component: App,
+						children: [
+							{
+								name: 'detail',
+								path: '/detail/:id',
+								component: function () {
+									return new Promise( ( resolve ) => {
+										setTimeout( () => {
+											resolve( Detail );
+										}, 1000 );
+									} );
+								}
+							},
+						]
+					}
+				]
+			});
+
+			router.start( '#app' );
+
+			if ( !location.hash ) {
+				location.href = '#!/app';
+			}
+		</script>
+	</body>
+</html>
