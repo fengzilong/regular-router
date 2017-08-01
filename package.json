@@ -5,7 +5,7 @@
   "main": "dist/regular-router.js",
   "scripts": {
     "dev": "onchange \"src\" -i -v -- npm run build",
-    "build": "bili --format umd --compress",
+    "build": "bili --format umd --compress --module-name=RegularRouter",
     "precommit": "lint-staged",
     "prettier": "prettier \"src/**/*.js\" --single-quote --write"
   },
