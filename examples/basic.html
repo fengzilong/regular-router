@@ -29,7 +29,12 @@
 			const Detail = {
 				template: `
 					{ this.$router.param.id }
-				`
+					<br>
+					<input r-model="{ v }" />
+				`,
+				config() {
+					this.data.v = 123;
+				},
 			};
 
 			const router = new RegularRouter({
@@ -40,7 +45,7 @@
 						component: App,
 						children: [
 							{
-								name: '/detail',
+								name: 'detail',
 								path: '/detail/:id',
 								component: Detail,
 							},
@@ -48,14 +53,6 @@
 					},
 				]
 			});
-
-			router.beforeEach( function( e ) {
-				console.log( 'before each' );
-			} );
-
-			router.afterEach( function() {
-				console.log( 'after each' );
-			} );
 
 			router.start( '#app' );
 

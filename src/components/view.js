@@ -26,7 +26,7 @@ export default Component => {
     clear() {
       if (this._prevcomponent) {
         this._prevcomponent.$inject(false);
-        this._prevcomponent.destroy();
+        // this._prevcomponent.destroy();
       }
     },
     update() {

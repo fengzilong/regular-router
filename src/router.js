@@ -96,6 +96,8 @@ class Router {
         components['default'] = component;
       }
 
+      const instanceMap = {};
+
       transformed[name] = {
         url: route.path,
         update() {
@@ -105,7 +107,6 @@ class Router {
         // 每次路由匹配都重新构造实例
         enter(e) {
           // check routerViews when route enters
-          const instanceMap = {};
 
           const promises = [];
           CtorMap[name] = {};
