@@ -121,10 +121,14 @@ class Router {
           return Promise.all(promises).then(() => {
             // get instances, and routerViews will be mounted
             for (const i in CtorMap[name]) {
-              instanceMap[i] = new CtorMap[name][i]({
-                __phase__: name,
-                __view__: i
-              });
+              instanceMap[i] =
+                instanceMap[i] ||
+                new CtorMap[name][i]({
+                  __phase__: name,
+                  __view__: i
+                }).$on('$destroy', () => {
+                  instanceMap[i] = null;
+                });
             }
 
             const routerViews = routerViewStack[parentName];
