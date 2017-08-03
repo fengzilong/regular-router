@@ -1,0 +1,67 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>demo</title>
+	</head>
+	<body>
+		<div id="app"></div>
+
+		<script src="../dist/regular-router.js"></script>
+		<script src="./regular.js"></script>
+		<script type="text/javascript">
+			Regular.use( RegularRouter );
+
+			const App = {
+				template: `
+					<aside>Sidebar</aside>
+					<section>
+						<a href="#!/detail/1">detail/1</a>
+						<a href="#!/">back</a>
+					</section>
+					<section>
+						<router-view></router-view>
+					</section>
+				`,
+				config() {
+				}
+			};
+
+			const Detail = {
+				template: `
+					{ this.$router.param.id }
+				`
+			};
+
+			const router = new RegularRouter({
+				routes: [
+					{
+						name: 'app',
+						path: '/',
+						component: App,
+						children: [
+							{
+								name: '/detail',
+								path: '/detail/:id',
+								component: Detail,
+							},
+						]
+					},
+				]
+			});
+
+			router.beforeEach( function( e ) {
+				console.log( 'before each' );
+			} );
+
+			router.afterEach( function() {
+				console.log( 'after each' );
+			} );
+
+			router.start( '#app' );
+
+			if ( !location.hash ) {
+				location.href = '#!/';
+			}
+		</script>
+	</body>
+</html>
