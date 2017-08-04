@@ -104,7 +104,6 @@ class Router {
           const routerViews = routerViewStack[parentName] || {};
           each(routerViews, v => v.update());
         },
-        // 每次路由匹配都重新构造实例
         enter(e) {
           // check routerViews when route enters
 
@@ -122,14 +121,23 @@ class Router {
           return Promise.all(promises).then(() => {
             // get instances, and routerViews will be mounted
             for (const i in CtorMap[name]) {
-              instanceMap[i] =
-                instanceMap[i] ||
-                new CtorMap[name][i]({
+              // use cached instance if possible
+              if (!instanceMap[i]) {
+                instanceMap[i] = new CtorMap[name][i]({
                   __phase__: name,
                   __view__: i
                 }).$on('$destroy', () => {
                   instanceMap[i] = null;
                 });
+              }
+
+              // call enter hook
+              const enterHook =
+                components[i].route && components[i].route.enter;
+              if (typeof enterHook === 'function') {
+                components[i].route.enter.call(instanceMap[i]);
+                instanceMap[i].$update();
+              }
             }
 
             const routerViews = routerViewStack[parentName];
