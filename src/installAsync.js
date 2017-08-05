@@ -1,13 +1,12 @@
+import isCtor from './utils/isCtor';
 import install from './install';
 
 export default function(definition, Component) {
-  if (typeof definition === 'function') {
+  if (typeof definition === 'function' && !isCtor(definition)) {
     return definition().then(def => {
-      install(def, Component);
-      return def._Ctor;
+      return install(def, Component);
     });
   } else {
-    install(definition, Component);
-    return Promise.resolve(definition._Ctor);
+    return Promise.resolve(install(definition, Component));
   }
 }

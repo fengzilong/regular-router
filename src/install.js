@@ -1,15 +1,18 @@
+import isCtor from './utils/isCtor';
+
 export default install;
 
 // install single component
 function install(definition, Component) {
   const Ctor = register(definition, Component);
-  const components = definition.components || {};
-  const filters = definition.filters || {};
 
   // no dependencies
-  if (!components) {
-    return;
+  if (!definition.components) {
+    return Ctor;
   }
+
+  const components = definition.components || {};
+  const filters = definition.filters || {};
 
   // avoid duplicate register
   delete definition.components;
@@ -24,9 +27,15 @@ function install(definition, Component) {
   for (const name in filters) {
     Ctor.filter(name, filters[name]);
   }
+
+  return Ctor;
 }
 
 function register(definition, Component) {
+  if (isCtor(definition)) {
+    return definition;
+  }
+
   if (definition._Ctor) {
     return definition._Ctor;
   }
