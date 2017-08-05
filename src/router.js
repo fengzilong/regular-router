@@ -135,7 +135,7 @@ class Router {
               const enterHook =
                 components[i].route && components[i].route.enter;
               if (typeof enterHook === 'function') {
-                components[i].route.enter.call(instanceMap[i]);
+                enterHook.call(instanceMap[i]);
                 instanceMap[i].$update();
               }
             }
