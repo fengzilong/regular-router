@@ -3,12 +3,11 @@ import View from './components/view';
 import Link from './components/link';
 import each from './utils/each';
 import walk from './walk';
-import installAsync from './installAsync';
+import install from './install';
 import checkPurview from './purview';
 
 class Router {
   constructor(options) {
-    // new
     this._options = options || {};
   }
 
@@ -60,7 +59,7 @@ class Router {
 
   _install(definition) {
     const Component = Router._Base;
-    return installAsync(definition, Component);
+    return install(definition, Component);
   }
 
   _transform(routes, selector) {
