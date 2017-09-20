@@ -1,3 +1,5 @@
+import install from './install';
+import installSync from './installSync';
 import Router from './router';
 
 export default function createRouter(options) {
@@ -9,3 +11,5 @@ export default function createRouter(options) {
     Router._Base = options;
   }
 }
+
+export { install, installSync };
