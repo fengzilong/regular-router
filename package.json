@@ -2,7 +2,9 @@
   "name": "regular-router",
   "version": "1.3.0",
   "description": "stateman based router for regular",
-  "main": "dist/regular-router.js",
+  "main": "dist/regular-router.common.js",
+  "module": "dist/regular-router.es.js",
+  "unpkg": "dist/regular-router.js",
   "scripts": {
     "dev": "bili --watch",
     "build": "bili",
