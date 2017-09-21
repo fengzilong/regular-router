@@ -9,7 +9,7 @@
 		<script src="../dist/regular-router.js"></script>
 		<script src="./regular.js"></script>
 		<script type="text/javascript">
-			Regular.use( RegularRouter );
+			Regular.use( RegularRouter.default );
 
 			const App = {
 				template: `
@@ -49,7 +49,7 @@
 
 			Detail.component( 'Button', Button );
 
-			const router = new RegularRouter({
+			const router = new RegularRouter.default({
 				routes: [
 					{
 						name: 'app',
