@@ -7,8 +7,8 @@ import install from './install';
 import checkPurview from './purview';
 
 class Router {
-  constructor(options) {
-    this._options = options || {};
+  constructor(options = {}) {
+    this._options = options;
   }
 
   notfound(fn) {
@@ -24,6 +24,10 @@ class Router {
   afterEach(fn) {
     const router = this._getInstance();
     router.on('end', fn);
+  }
+
+  configure(options = {}) {
+    Object.assign(this._options, options);
   }
 
   _check() {
@@ -85,7 +89,10 @@ class Router {
     const transformed = {};
     for (const name in routeMap) {
       const route = routeMap[name];
-      const parentName = name.split('.').slice(0, -1).join('.');
+      const parentName = name
+        .split('.')
+        .slice(0, -1)
+        .join('.');
       const component = route.component;
       const components = route.components || {};
       const CtorMap = {};
@@ -99,6 +106,7 @@ class Router {
 
       transformed[name] = {
         url: route.path,
+        meta: route.meta || {},
         update() {
           const routerViews = routerViewStack[parentName] || {};
           each(routerViews, v => v.update());
@@ -194,7 +202,7 @@ class Router {
 
     this._register();
 
-    // should dynamic register
+    // should dynamic register instead of installing here
     // this._install(routes);
 
     stateman.state(this._transform(routes, selector));
