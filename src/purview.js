@@ -1,10 +1,10 @@
-const checkPurview = (e, hookName, components, cb) => {
+const checkPurview = (e, hookName, components, globalHooks = [], cb) => {
   const resolve = e.async();
   const from = e.previous;
   const to = e.current;
   const go = e.go;
 
-  let len = Object.keys(components).length;
+  let len = Object.keys(components).length + globalHooks.length;
 
   function next(rst) {
     len--;
@@ -27,12 +27,20 @@ const checkPurview = (e, hookName, components, cb) => {
       canTransition({
         from: from,
         to: to,
-        route: to,
         redirect: go,
         next
       });
     }
   }
+
+  globalHooks.forEach(fn =>
+    fn({
+      from: from,
+      to: to,
+      redirect: go,
+      next
+    })
+  );
 };
 
 export default checkPurview;

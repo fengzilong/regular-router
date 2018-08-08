@@ -9,6 +9,10 @@ import checkPurview from './purview';
 class Router {
   constructor(options = {}) {
     this._options = options;
+    this._hooks = {
+      beforeEach: [],
+      afterEach: []
+    };
   }
 
   notfound(fn) {
@@ -16,14 +20,22 @@ class Router {
     router.on('notfound', fn);
   }
 
-  beforeEach(fn) {
+  onBegin(fn) {
     const router = this._getInstance();
     router.on('begin', fn);
   }
 
-  afterEach(fn) {
+  onEnd(fn) {
     const router = this._getInstance();
     router.on('end', fn);
+  }
+
+  beforeEach(fn) {
+    this._hooks.beforeEach.push(fn);
+  }
+
+  afterEach() {
+    this._hooks.afterEach.push(fn);
   }
 
   configure(options = {}) {
@@ -110,6 +122,15 @@ class Router {
         update() {
           const routerViews = routerViewStack[parentName] || {};
           each(routerViews, v => v.update());
+
+          // call hook
+          for (const i in components) {
+            const definition = components[i];
+            const hook = definition.route && definition.route.update;
+            if (typeof hook === 'function') {
+              hook.call(instanceMap[i]);
+            }
+          }
         },
         enter(e) {
           // check routerViews when route enters
@@ -165,10 +186,10 @@ class Router {
           });
         },
         canEnter(e) {
-          checkPurview(e, 'canEnter', components);
+          checkPurview(e, 'canEnter', components, self._hooks.beforeEach);
         },
         canLeave(e) {
-          checkPurview(e, 'canLeave', components);
+          checkPurview(e, 'canLeave', components, []);
         },
         leave(e) {
           // clean
@@ -185,6 +206,24 @@ class Router {
             routeMap[name].rootInstance.$inject(false);
             routeMap[name].rootInstance = null;
           }
+
+          // call hook
+          for (const i in components) {
+            const definition = components[i];
+            const hook = definition.route && definition.route.leave;
+            if (typeof hook === 'function') {
+              hook.call(instanceMap[i]);
+            }
+          }
+
+          // call global hook
+          self._hooks.afterEach.forEach(fn =>
+            fn({
+              from: e.previous,
+              to: e.current,
+              redirect: e.go
+            })
+          );
         }
       };
     }
