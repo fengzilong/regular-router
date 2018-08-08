@@ -1,6 +1,6 @@
 {
   "name": "regular-router",
-  "version": "1.4.1",
+  "version": "2.0.0",
   "description": "stateman based router for regular",
   "main": "dist/regular-router.common.js",
   "module": "dist/regular-router.es.js",
