@@ -12,7 +12,6 @@ function install(definition, Component) {
   }
 
   const components = definition.components || {};
-  const filters = definition.filters || {};
 
   // avoid unnecessary re-registering for next time
   delete definition.components;
@@ -21,11 +20,6 @@ function install(definition, Component) {
   for (const name in components) {
     Ctor.component(name, register(components[name], Component));
     install(components[name], Component);
-  }
-
-  // register filters
-  for (const name in filters) {
-    Ctor.filter(name, filters[name]);
   }
 
   return Ctor;
@@ -40,7 +34,14 @@ function register(definition, Component) {
     return definition._Ctor;
   }
 
+  const filters = definition.filters || {};
   const Ctor = Component.extend(definition);
+
+  // register filters
+  for (const name in filters) {
+    Ctor.filter(name, filters[name]);
+  }
+
   definition._Ctor = Ctor;
   return Ctor;
 }
