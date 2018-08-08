@@ -183,6 +183,15 @@ class Router {
               routeMap[name].rootInstance = instanceMap.default;
               instanceMap.default.$inject(rootNode);
             }
+
+            // call global hook
+            self._hooks.afterEach.forEach(fn =>
+              fn({
+                from: e.previous,
+                to: e.current,
+                redirect: e.go
+              })
+            );
           });
         },
         canEnter(e) {
@@ -215,15 +224,6 @@ class Router {
               hook.call(instanceMap[i]);
             }
           }
-
-          // call global hook
-          self._hooks.afterEach.forEach(fn =>
-            fn({
-              from: e.previous,
-              to: e.current,
-              redirect: e.go
-            })
-          );
         }
       };
     }
