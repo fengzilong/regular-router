@@ -34,7 +34,7 @@ class Router {
     this._hooks.beforeEach.push(fn);
   }
 
-  afterEach() {
+  afterEach(fn) {
     this._hooks.afterEach.push(fn);
   }
 
