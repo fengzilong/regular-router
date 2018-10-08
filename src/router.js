@@ -107,13 +107,13 @@ class Router {
         .join('.');
       const component = route.component;
       const components = route.components || {};
-      const CtorMap = {};
 
       // merge
       if (!components['default'] && component) {
         components['default'] = component;
       }
 
+      const CtorMap = {};
       const instanceMap = {};
 
       transformed[name] = {
@@ -136,22 +136,21 @@ class Router {
           // check routerViews when route enters
 
           const promises = [];
-          CtorMap[name] = {};
           for (const i in components) {
             let definition = components[i];
             promises.push(
               self._install(definition).then(Ctor => {
-                CtorMap[name][i] = Ctor;
+                CtorMap[i] = Ctor;
               })
             );
           }
 
           return Promise.all(promises).then(() => {
             // get instances, and routerViews will be mounted
-            for (const i in CtorMap[name]) {
+            for (const i in CtorMap) {
               // use cached instance if possible
               if (!instanceMap[i]) {
-                instanceMap[i] = new CtorMap[name][i]({
+                instanceMap[i] = new CtorMap[i]({
                   __phase__: name,
                   __view__: i
                 }).$on('$destroy', () => {
