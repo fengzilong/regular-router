@@ -4,6 +4,8 @@ export default install;
 
 // install single component
 function install(definition, Component) {
+  definition = handleEsModule(definition);
+
   const Ctor = register(definition, Component);
 
   // no dependencies
@@ -23,6 +25,14 @@ function install(definition, Component) {
   }
 
   return Ctor;
+}
+
+function handleEsModule(definition) {
+  if (definition.__esModule) {
+    return definition.default;
+  }
+
+  return definition;
 }
 
 function register(definition, Component) {
