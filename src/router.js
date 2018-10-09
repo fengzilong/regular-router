@@ -2,6 +2,7 @@ import Stateman from 'stateman';
 import View from './components/view';
 import Link from './components/link';
 import each from './utils/each';
+import promisify from './utils/promisify';
 import walk from './walk';
 import install from './install';
 import checkPurview from './purview';
@@ -78,6 +79,38 @@ class Router {
     return install(definition, Component);
   }
 
+  _resolveDefinitions(components) {
+    return Promise.all(
+      Object.keys(components).map(key => {
+        return promisify(components[key]).then(component => ({
+          key: key,
+          component: component
+        }));
+      })
+    ).then(results => {
+      return results.reduce((prev, current) => {
+        prev[current.key] = current.component;
+        return prev;
+      }, {});
+    });
+  }
+
+  _resolveCtors(components) {
+    const installations = Object.keys(components).map(key => {
+      return this._install(components[key]).then(Ctor => ({
+        key: key,
+        ctor: Ctor
+      }));
+    });
+
+    return Promise.all(installations).then(results => {
+      return results.reduce((prev, current) => {
+        prev[current.key] = current.ctor;
+        return prev;
+      }, {});
+    });
+  }
+
   _transform(routes, selector) {
     const stateman = this._getInstance();
     const self = this;
@@ -108,12 +141,11 @@ class Router {
       const component = route.component;
       const components = route.components || {};
 
-      // merge
+      // normalize
       if (!components['default'] && component) {
         components['default'] = component;
       }
 
-      const CtorMap = {};
       const instanceMap = {};
 
       transformed[name] = {
@@ -124,28 +156,19 @@ class Router {
           each(routerViews, v => v.update());
 
           // call hook
-          for (const i in components) {
-            const definition = components[i];
-            const hook = definition.route && definition.route.update;
-            if (typeof hook === 'function') {
-              hook.call(instanceMap[i]);
+          self._resolveDefinitions(components).then(components => {
+            for (const i in components) {
+              const definition = components[i];
+              const hook = definition.route && definition.route.update;
+              if (typeof hook === 'function') {
+                hook.call(instanceMap[i]);
+              }
             }
-          }
+          });
         },
         enter(e) {
           // check routerViews when route enters
-
-          const promises = [];
-          for (const i in components) {
-            let definition = components[i];
-            promises.push(
-              self._install(definition).then(Ctor => {
-                CtorMap[i] = Ctor;
-              })
-            );
-          }
-
-          return Promise.all(promises).then(() => {
+          return self._resolveCtors(components).then(CtorMap => {
             // get instances, and routerViews will be mounted
             for (const i in CtorMap) {
               // use cached instance if possible
@@ -194,10 +217,22 @@ class Router {
           });
         },
         canEnter(e) {
-          checkPurview(e, 'canEnter', components, self._hooks.beforeEach);
+          const resolve = e.async();
+          self._resolveDefinitions(components).then(components => {
+            checkPurview(
+              e,
+              resolve,
+              'canEnter',
+              components,
+              self._hooks.beforeEach
+            );
+          });
         },
         canLeave(e) {
-          checkPurview(e, 'canLeave', components, []);
+          const resolve = e.async();
+          self._resolveDefinitions(components).then(components => {
+            checkPurview(e, resolve, 'canLeave', components, []);
+          });
         },
         leave(e) {
           // clean
@@ -216,13 +251,15 @@ class Router {
           }
 
           // call hook
-          for (const i in components) {
-            const definition = components[i];
-            const hook = definition.route && definition.route.leave;
-            if (typeof hook === 'function') {
-              hook.call(instanceMap[i]);
+          self._resolveDefinitions(components).then(components => {
+            for (const i in components) {
+              const definition = components[i];
+              const hook = definition.route && definition.route.leave;
+              if (typeof hook === 'function') {
+                hook.call(instanceMap[i]);
+              }
             }
-          }
+          });
         }
       };
     }

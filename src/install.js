@@ -1,12 +1,8 @@
-import isCtor from './utils/isCtor';
+import promisify from './utils/promisify';
 import installSync from './installSync';
 
 export default function(definition, Component) {
-  if (typeof definition === 'function' && !isCtor(definition)) {
-    return definition().then(def => {
-      return installSync(def, Component);
-    });
-  } else {
-    return Promise.resolve(installSync(definition, Component));
-  }
+  return promisify(definition).then(def => {
+    return installSync(def, Component);
+  });
 }

@@ -1,5 +1,11 @@
-const checkPurview = (e, hookName, components, globalHooks = [], cb) => {
-  const resolve = e.async();
+const checkPurview = (
+  e,
+  resolve,
+  hookName,
+  components,
+  globalHooks = [],
+  cb
+) => {
   const from = e.previous;
   const to = e.current;
   const go = e.go;
